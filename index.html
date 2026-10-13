@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-JpM6vczHGPqBzunPpO1yDv81IHyowpglGRRQ7lXVc0M='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data: blob:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-OHCCoQ7zuWQlF9arMvWk8qjJD0Tkj0Ho7JclmDO31kE='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data: blob:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="두 주연의 이름을 넣으면 그 둘이 주인공인 영화가 상영되는 시뮬레이션">
 <title>두 사람의 상영관</title>
@@ -98,6 +98,12 @@ button{cursor:pointer}
 .tk-bye{font-size:11px;letter-spacing:.2em;margin-top:8px;display:flex;align-items:center;gap:10px;width:100%}
 .tk-bye::before,.tk-bye::after{content:"";flex:1;border-top:1.5px dashed var(--pink)}
 .zig{height:10px;background:linear-gradient(135deg,var(--paper) 50%,transparent 50%) 0 0/14px 14px repeat-x,linear-gradient(225deg,var(--paper) 50%,transparent 50%) 0 0/14px 14px repeat-x}
+.tk-notice{margin-top:22px;padding:12px 14px;border:1px solid var(--pink);font-family:var(--sans);font-size:11.5px;line-height:1.7;letter-spacing:-.02em}
+.tk-notice b{display:block;font-family:var(--receipt);font-weight:500;font-size:10px;letter-spacing:.26em;margin-bottom:4px}
+.tk-notice ul{margin:0;padding-left:1.1em}
+.tk-credit{margin-top:6px;font-family:var(--receipt);font-size:10.5px;letter-spacing:.16em;color:var(--pink);text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:1px}
+.tk-credit:hover{opacity:.65}
+.tk-fine{font-family:var(--sans);font-size:11px;color:var(--pmute);margin-top:2px}
 .tk-note{font-size:12px;color:var(--mute);margin:0;text-align:center}
 .paper :focus-visible,.tk-paper :focus-visible{outline:2px solid var(--pink);outline-offset:2px}
 
@@ -283,10 +289,21 @@ body{word-break:keep-all;letter-spacing:-.01em;-webkit-font-smoothing:antialiase
     <p class="tk-err" id="err" role="alert"></p>
     <button class="tk-go" type="submit">상영 시작 <span>ENTER →</span></button>
 
+    <div class="tk-notice">
+      <b>NOTICE</b>
+      <ul>
+        <li>이 영화의 인물과 사건은 모두 가상입니다.</li>
+        <li>실존 인물의 이름은 넣지 말아 주세요.</li>
+        <li>입력한 이름은 어디에도 전송·수집되지 않아요.</li>
+        <li>결과 이미지는 자유롭게 공유해 주세요. 페이지와 코드의 무단 재배포·수정은 금지예요.</li>
+      </ul>
+    </div>
+
     <div class="tk-foot">
       <div class="barcode" id="barcode" aria-hidden="true"></div>
       <span class="tk-no" id="tkCode"></span>
       <span class="tk-bye">HAVE A NICE MOVIE</span>
+      <a class="tk-credit" href="https://x.com/Butter_B0" target="_blank" rel="noopener noreferrer">MADE BY 버터 @Butter_B0</a>
     </div>
    </div>
    <div class="zig" aria-hidden="true"></div>
@@ -418,6 +435,8 @@ body{word-break:keep-all;letter-spacing:-.01em;-webkit-font-smoothing:antialiase
       <div class="barcode" id="barcode2" aria-hidden="true"></div>
       <span class="tk-no" id="rCode"></span>
       <span class="tk-bye">THANK YOU FOR WATCHING</span>
+      <span class="tk-fine">이 영화의 인물과 사건은 모두 가상입니다.</span>
+      <a class="tk-credit" href="https://x.com/Butter_B0" target="_blank" rel="noopener noreferrer">MADE BY 버터 @Butter_B0</a>
     </div>
    </div>
    <div class="zig" aria-hidden="true"></div>
@@ -1426,7 +1445,7 @@ async function buildShareCard(f){
   const worst=S.reduce((m,s)=>s.dAff<m.dAff?s:m,S[0]);
   const last=S[S.length-1];
   const no=$("#rNo").textContent||"NO.0000";
-  const allText=f.title+A+B+f.genreName+best.text+worst.text+last.text+f.review+ENDS[f.endKey]+REL[f.cfg.rel].name+"〈〉“”·★호감도곡선명장면관람완료해피엔딩열린결말새드두사람의상영관#";
+  const allText=f.title+A+B+f.genreName+best.text+worst.text+last.text+f.review+ENDS[f.endKey]+REL[f.cfg.rel].name+"〈〉“”·★호감도곡선명장면관람완료해피엔딩열린결말새드두사람의상영관#가상의이야기입니다실존인물사용금지버터@Butter_B0MADEBY";
   try{
     await Promise.all([
       document.fonts.load('800 60px "Noto Sans KR"',allText),
@@ -1559,7 +1578,10 @@ async function buildShareCard(f){
   x.textAlign="center";x.fillStyle=MUTE;font(400,16,MONO);ls(8);
   x.fillText(String(hash(f.title+A+B)).padStart(10,"0").slice(0,10),W/2,by+bh+28);ls(0);
   x.fillStyle=INK;font(500,19,SANS);ls(1);x.fillText("#두사람의상영관",W/2,by+bh+58);ls(0);
-  return {c,end:by+bh+92};
+  dotted(by+bh+82,L,R,[2,6],LINE,2);
+  x.fillStyle=MUTE;font(400,16,SANS);x.fillText("가상의 이야기입니다 · 실존 인물 사용 금지",W/2,by+bh+114);
+  x.fillStyle=INK;font(400,15,MONO);ls(3);x.fillText("MADE BY 버터 @Butter_B0",W/2,by+bh+142);ls(0);
+  return {c,end:by+bh+176};
   }
 }
 let shareURL=null;
