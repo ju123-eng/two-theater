@@ -1,0 +1,1596 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>두 사람의 상영관</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single-screen midnight theater — ticket stub to set up, letterboxed screen while it plays, a programme booklet of charts after. Deliberately one dark look. */
+:root{
+  color-scheme:dark;
+  --bg:#0c0b0e; --panel:#16141a; --panel2:#1e1b23; --line:#2d2934;
+  --ink:#ece6da; --mute:#9890a3; --dim:#5f5869;
+  --amber:#f2b64e; --aff:#ff6b93; --ca:#5fd3c4; --cb:#b8a1ff; --bad:#e8604f; --good:#7ad48a;
+  --display:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --serif:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --sans:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --receipt:'IBM Plex Mono','Nanum Gothic Coding',ui-monospace,monospace;
+  --paper:#f3f1ec; --pink:#161514; --pmute:#7e7a73; --pline:rgba(22,21,20,.22); --perr:#c2402e;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;
+  background-image:radial-gradient(ellipse 80% 50% at 50% -10%, rgba(242,182,78,.10), transparent 70%);}
+.wrap{max-width:900px;margin:0 auto;padding-inline:16px;padding-block:28px 64px}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+
+/* ---------- setup: receipt ticket ---------- */
+.tk-stage{display:flex;flex-direction:column;align-items:center;gap:14px;padding-block:6px 10px}
+.tk-shadow{width:100%;max-width:440px;filter:drop-shadow(0 24px 40px rgba(0,0,0,.55))}
+.ticket{display:block;-webkit-mask:radial-gradient(circle 6px at 50% 0,transparent 96%,#000) top left/20px 100% repeat-x;mask:radial-gradient(circle 6px at 50% 0,transparent 96%,#000) top left/20px 100% repeat-x}
+.tk-paper{background:var(--paper);color:var(--pink);font-family:var(--receipt);overflow:hidden;padding:26px 26px 6px}
+.tk-paper ::selection{background:var(--pink);color:var(--paper)}
+.tk-top{display:flex;justify-content:space-between;font-size:10px;letter-spacing:.14em;color:var(--pmute)}
+.tk-head{text-align:center;display:flex;flex-direction:column;gap:4px;padding-block:18px 16px}
+.tk-head h1{font-family:var(--sans);font-weight:800;font-size:30px;letter-spacing:-.05em;line-height:1.15;margin:0}
+.tk-en{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--pmute);margin:0}
+.tk-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:12px 10px;padding-block:14px 16px;border-top:1.5px dotted var(--pink)}
+.tk-meta div{display:flex;flex-direction:column;gap:2px}
+.tk-meta dt{font-size:9.5px;letter-spacing:.16em;color:var(--pmute)}
+.tk-meta dd{margin:0;font-size:13px;font-weight:500;font-variant-numeric:tabular-nums}
+.tk-cut{position:relative;height:0;border-top:1.5px dashed var(--pink);margin-inline:-26px}
+.tk-cut::before,.tk-cut::after{content:"";position:absolute;top:-11px;width:20px;height:20px;border-radius:50%;background:var(--bg)}
+.tk-cut::before{left:-10px}.tk-cut::after{right:-10px}
+.tk-sec{display:flex;flex-direction:column;gap:10px;padding-block:18px 2px}
+.tk-label{display:flex;align-items:baseline;gap:8px}
+.tk-label sup{font-size:9.5px;color:var(--pmute);letter-spacing:.06em}
+.tk-label b{font-family:var(--sans);font-size:14.5px;font-weight:700;letter-spacing:-.02em}
+.tk-label span{font-size:10px;letter-spacing:.18em;color:var(--pmute)}
+.tk-label em{margin-left:auto;font-style:normal;font-size:10.5px;color:var(--pmute)}
+.fill{display:grid;grid-template-columns:30px 1fr;align-items:end;gap:6px}
+.fill span{font-size:10.5px;color:var(--pmute);padding-bottom:8px}
+.fill input{background:transparent;border:0;border-bottom:1px solid var(--pink);border-radius:0;padding:6px 2px;font-family:var(--sans);font-weight:500;font-size:17px;letter-spacing:-.02em;color:var(--pink);outline:0;min-width:0;width:100%}
+.fill input::placeholder{color:#b3afa7;font-weight:400}
+.fill input:focus{border-bottom-width:2px;padding-bottom:5px}
+.opts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.opts.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.opt{background:transparent;border:1px solid var(--pink);border-radius:2px;color:var(--pink);padding:7px 4px;font-family:var(--sans);font-size:12.5px;font-weight:500;letter-spacing:-.02em;display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.35;transition:background .12s,color .12s}
+.opt small{font-family:var(--receipt);font-size:9.5px;letter-spacing:.06em;font-weight:400;opacity:.65}
+.opt:hover{background:rgba(22,21,20,.06)}
+.opt[aria-pressed="true"]{background:var(--pink);color:var(--paper)}
+.items{display:flex;flex-direction:column}
+.item{display:flex;align-items:center;gap:9px;background:none;border:0;padding:6px 0;text-align:left;color:var(--pink);font-family:var(--sans)}
+.item .box{width:11px;height:11px;border:1.2px solid var(--pink);flex:none}
+.item[aria-pressed="true"] .box{background:var(--pink);box-shadow:inset 0 0 0 2px var(--paper)}
+.item .nm{font-size:14px;font-weight:500;letter-spacing:-.02em;white-space:nowrap}
+.item .lead{flex:1;border-bottom:1.5px dotted var(--pline);transform:translateY(-3px);min-width:12px}
+.item .rt{font-family:var(--receipt);font-size:10px;border:1px solid currentColor;padding:0 4px;line-height:15px;color:var(--pmute);min-width:30px;text-align:center}
+.item .qty{font-family:var(--receipt);font-size:12px;width:24px;text-align:right;color:var(--pline)}
+.item[aria-pressed="true"] .qty{color:var(--pink);font-weight:500}
+.item:hover .nm{text-decoration:underline;text-underline-offset:3px}
+.tk-total{margin-top:18px;padding-block:12px;border-block:1.5px dotted var(--pink);display:grid;gap:3px;font-size:11.5px}
+.tk-total .row{display:flex;justify-content:space-between;gap:12px}
+.tk-total .row span:first-child{color:var(--pmute);letter-spacing:.1em}
+.tk-total .row span:last-child{text-align:right;font-family:var(--receipt)}
+.tk-total .big{font-size:17px;font-weight:500;margin-bottom:4px}
+.tk-total .big span:first-child{color:var(--pink);letter-spacing:.06em}
+.tk-err{color:var(--perr);font-family:var(--sans);font-size:12.5px;margin:10px 0 0;min-height:1em}
+.tk-go{width:100%;margin-top:8px;background:var(--pink);color:var(--paper);border:0;border-radius:2px;padding:14px;font-family:var(--sans);font-weight:700;font-size:15px;letter-spacing:-.01em;display:flex;justify-content:space-between;align-items:center}
+.tk-go span{font-family:var(--receipt);font-size:11px;font-weight:400;letter-spacing:.14em;opacity:.7}
+.tk-go:hover{background:#2c2a27}
+.tk-go:focus-visible{outline-color:var(--pink)}
+.tk-foot{display:flex;flex-direction:column;align-items:center;gap:6px;padding-block:22px 12px}
+.barcode{display:flex;align-items:stretch;height:46px;width:100%;gap:0}
+.barcode i{display:block;background:var(--pink);flex:none}
+.barcode b{display:block;flex:none}
+.tk-no{font-size:10px;letter-spacing:.32em;color:var(--pmute)}
+.tk-bye{font-size:11px;letter-spacing:.2em;margin-top:8px;display:flex;align-items:center;gap:10px;width:100%}
+.tk-bye::before,.tk-bye::after{content:"";flex:1;border-top:1.5px dashed var(--pink)}
+.zig{height:10px;background:linear-gradient(135deg,var(--paper) 50%,transparent 50%) 0 0/14px 14px repeat-x,linear-gradient(225deg,var(--paper) 50%,transparent 50%) 0 0/14px 14px repeat-x}
+.tk-note{font-size:12px;color:var(--mute);margin:0;text-align:center}
+.paper :focus-visible,.tk-paper :focus-visible{outline:2px solid var(--pink);outline-offset:2px}
+
+/* ---------- paper scope: tokens re-mapped to ink on paper ---------- */
+.tk-paper{--aff:#d3365c;--ca:#161514;--cb:#8a857c;--amber:#161514;--good:#2f7d4a;--bad:#c2402e;--line:rgba(22,21,20,.16);--dim:#a9a49b;--mute:#7e7a73;--ink:#161514;--panel:rgba(22,21,20,.035)}
+.tk-shadow.wide{max-width:620px}
+.tk-head h1.film{font-size:clamp(22px,4.6vw,28px)}
+.tk-sec>.tk-label{padding-bottom:2px}
+
+/* ---------- theater ---------- */
+.screen{position:relative;background:#0b0b0c;color:#f3f1ec;border-radius:0;min-height:280px;display:flex;flex-direction:column;justify-content:flex-end;padding:52px 24px 30px;overflow:hidden;margin-top:4px}
+.screen::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 40%, rgba(243,241,236,.07), transparent 70%);pointer-events:none}
+.screen .hud{position:absolute;top:14px;left:16px;right:16px;display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:#6f6b64;letter-spacing:.12em}
+.screen .rec::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#e8604f;margin-right:7px;vertical-align:1px;animation:blink 1.2s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.past{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.past p{margin:0;font-family:var(--sans);font-size:14px;color:#77736c;line-height:1.6}
+.past p:first-child{opacity:.55}
+.sub{font-family:var(--sans);font-size:clamp(18px,3.2vw,22px);line-height:1.7;margin:0;min-height:3.4em;text-wrap:pretty;color:#f6f3ec}
+.count{position:absolute;inset:0;display:grid;place-items:center;font-size:96px;color:#f3f1ec;background:#0b0b0c}
+.count svg{position:absolute;width:200px;height:200px;opacity:.5}
+.count svg *{stroke:#6f6b64!important}
+.theend{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-size:clamp(34px,8vw,56px);background:#0b0b0c;color:#f3f1ec}
+.theend small{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:#8a857c;margin-top:10px}
+.reel{height:3px;background:var(--line);margin-top:0;overflow:hidden}
+.reel i{display:block;height:100%;width:0;background:var(--ink);transition:width .4s ease}
+.tk-paper .tk-meta.live{border-top:0;padding-block:14px 14px}
+.meters{display:flex;flex-direction:column}
+.m{display:grid;grid-template-columns:64px minmax(0,1fr) 40px 78px;align-items:center;gap:10px;padding-block:8px;border-bottom:1.5px dotted var(--line)}
+.m:last-child{border-bottom:0}
+.m .k{font-family:var(--sans);font-size:13px;font-weight:500;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m .v{font-family:var(--receipt);font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+.track{position:relative;height:8px;background:rgba(22,21,20,.07);overflow:hidden}
+.track i{position:absolute;top:0;bottom:0;transition:left .5s ease,width .5s ease}
+.track i.hatch{background:repeating-linear-gradient(135deg,var(--ink) 0 2px,transparent 2px 5px)!important}
+.track.c::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--ink)}
+.m .emo{display:flex;justify-content:space-between;align-items:center;gap:4px;font-family:var(--sans);font-size:12px}
+.m .emo>span:first-child{border:1px solid var(--ink);padding:0 5px;line-height:18px;white-space:nowrap}
+.delta{font-family:var(--receipt);font-size:11px;opacity:0}
+.delta.show{animation:pop 1.6s ease forwards}
+@keyframes pop{0%{opacity:0;transform:translateY(4px)}15%{opacity:1;transform:none}80%{opacity:1}100%{opacity:0}}
+.up{color:var(--good)}.dn{color:var(--bad)}
+.rate{font-family:var(--receipt);font-size:11px;border:1px solid currentColor;padding:0 5px;line-height:17px}
+.rate.r15{color:var(--bad)}.rate.r12,.rate.rall{color:var(--ink)}
+.opt.on,.opt[aria-pressed="true"]{background:var(--pink);color:var(--paper)}
+
+/* ---------- results ---------- */
+.stamp{position:absolute;right:18px;top:64px;transform:rotate(-12deg);border:2px solid currentColor;border-radius:50%;width:92px;height:92px;display:grid;place-items:center;text-align:center;font-family:var(--sans);font-weight:800;font-size:14px;letter-spacing:-.02em;line-height:1.15;opacity:.85;pointer-events:none}
+.stamp small{display:block;font-family:var(--receipt);font-weight:400;font-size:8.5px;letter-spacing:.18em}
+.stamp.good{color:#2f7d4a}.stamp.openE{color:#8a6a1e}.stamp.bad{color:#c2402e}
+.res-head{position:relative}
+.review{font-family:var(--sans);text-align:center;margin:0;padding-block:4px 16px;font-size:15px;font-weight:500;letter-spacing:-.02em}
+.review span{display:block;font-family:var(--receipt);font-size:10.5px;letter-spacing:.14em;color:var(--pmute);font-weight:400;margin-top:4px}
+.chart{width:100%;overflow:hidden}
+.chart svg{display:block;touch-action:pan-y}
+.chart .g{stroke:var(--line);stroke-width:1}
+.chart .g.zero{stroke:var(--ink);stroke-dasharray:2 3;opacity:.6}
+.chart .ax{fill:var(--mute);font-family:var(--mono);font-size:10px}
+.chart .actl{fill:var(--ink);font-size:10.5px;font-family:var(--receipt)}
+.chart .actline{stroke:var(--ink);stroke-dasharray:1 3;opacity:.5}
+.chart .sel{stroke:var(--aff);stroke-width:1}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-family:var(--sans);font-size:12px;margin:0 0 2px}
+.legend i{display:inline-block;width:18px;height:0;border-top:2px solid var(--ink);vertical-align:middle;margin-right:6px}
+.legend i.dash{border-top:2px dashed var(--cb)}
+.pick{margin:6px 0 0;padding:10px 0 2px;border-top:1.5px dotted var(--line);display:grid;gap:4px;min-height:70px}
+.pick .t{font-family:var(--sans);font-size:14.5px;letter-spacing:-.02em}
+.pick .h{font-family:var(--receipt);font-size:10.5px;color:var(--pmute);display:flex;flex-wrap:wrap;gap:2px 12px}
+.chars{display:flex;flex-direction:column}
+.ch{display:flex;flex-direction:column;gap:6px;padding-block:10px 12px;border-bottom:1.5px dotted var(--line)}
+.ch:last-child{border-bottom:0}
+.ch .nm{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-weight:700;font-size:16px;letter-spacing:-.03em}
+.ch .nm i{width:9px;height:9px;border-radius:0}
+.ch .row{display:grid;grid-template-columns:92px 1fr;gap:10px;font-size:12.5px;align-items:baseline}
+.ch .row span:first-child{font-family:var(--receipt);font-size:10.5px;letter-spacing:.06em;color:var(--pmute)}
+.ch .row span:last-child{font-family:var(--sans);font-size:13.5px;letter-spacing:-.02em}
+.script{list-style:none;margin:0;padding:0}
+.script li{display:grid;grid-template-columns:46px 1fr;gap:3px 10px;padding:9px 0;border-top:1.5px dotted var(--line);cursor:pointer}
+.script li:hover .tx{text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.script li.on{background:rgba(211,54,92,.06);box-shadow:inset 2px 0 0 var(--aff);padding-left:8px;margin-left:-8px}
+.script li.act{display:flex;align-items:center;gap:10px;cursor:default;font-family:var(--receipt);font-size:10.5px;letter-spacing:.2em;color:var(--ink);padding:14px 0 6px;border-top:0}
+.script li.act::after{content:"";flex:1;border-top:1.5px solid var(--ink)}
+.script .tc{font-family:var(--receipt);font-size:10px;color:var(--pmute);line-height:1.5;padding-top:2px}
+.script .tc b{display:block;color:var(--ink);font-weight:500;font-size:11px}
+.script .tx{font-family:var(--sans);font-size:14px;letter-spacing:-.02em;min-width:0}
+.dl{grid-column:2;display:flex;flex-wrap:wrap;gap:5px}
+.dl span{font-family:var(--receipt);font-size:10.5px;padding:0 6px;border:1px solid currentColor;line-height:17px}
+.actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px}
+.actions .tk-go{grid-column:1/-1;margin-top:0}
+.copied{grid-column:1/-1;font-family:var(--sans);font-size:12.5px;color:var(--good);text-align:center}
+.tk-go.alt{background:transparent;color:var(--pink);border:1.5px solid var(--pink)}
+.tk-go.alt:hover{background:rgba(22,21,20,.06)}
+.share-panel{margin-top:16px;padding-top:16px;border-top:1.5px dotted var(--line);display:flex;flex-direction:column;gap:10px}
+.share-panel img{display:block;width:100%;max-width:100%;border:1px solid var(--line);background:#0c0b0e}
+.share-row{display:flex;flex-wrap:wrap;gap:6px}
+.share-row .opt{flex:1 1 30%;text-decoration:none;justify-content:center;padding:9px 6px}
+.share-hint{font-family:var(--sans);font-size:12px;color:var(--pmute);margin:0;line-height:1.6}
+textarea.fallback{width:100%;height:160px;margin-top:10px;background:transparent;color:var(--ink);border:1px solid var(--ink);padding:10px;font-family:var(--receipt);font-size:12px}
+
+@media (max-width:640px){
+  .tk-paper{padding-inline:20px}
+  .tk-cut{margin-inline:-20px}
+  .screen{min-height:240px;padding:46px 16px 22px}
+  .m{grid-template-columns:56px minmax(0,1fr) 34px 70px;gap:8px}
+  .stamp{width:76px;height:76px;font-size:12px;top:58px;right:10px}
+  .ch .row{grid-template-columns:76px 1fr}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- 타이포 정리: Noto Sans KR 단일 서체 ---------- */
+body{word-break:keep-all;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
+.brand h1{font-weight:800;letter-spacing:-.045em}
+.brand p{font-weight:300;font-size:16px}
+.bar h2,.poster h2{font-weight:700;letter-spacing:-.035em}
+.ch .nm{font-weight:700;font-size:20px;letter-spacing:-.03em}
+.poster .card{font-weight:700;font-size:16px;letter-spacing:-.03em;line-height:1.3}
+.stub .admit{font-family:var(--mono);font-weight:500;font-size:15px;letter-spacing:.3em}
+.count{font-family:var(--mono);font-weight:400;font-size:96px}
+.theend{font-family:var(--sans);font-weight:300;letter-spacing:.35em}
+.sub{font-weight:400;letter-spacing:-.02em;line-height:1.7}
+.past p{font-weight:300}
+.script .tx,.pick .t,.ch .row span:last-child{font-weight:400;font-size:14.5px}
+.review{font-weight:400}
+.field>label,.field>.lab{font-weight:500;letter-spacing:-.01em}
+.chip{font-weight:400}
+.chip[aria-pressed="true"]{font-weight:500}
+.go{font-weight:700;letter-spacing:-.01em}
+.sec>h3{font-weight:700;letter-spacing:-.02em}
+.name input{font-weight:500;letter-spacing:-.02em}
+@media (max-width:640px){.stub .admit{font-size:13px}}
+</style>
+
+<div class="wrap">
+
+<!-- SETUP -->
+<section id="setup">
+ <div class="tk-stage">
+  <div class="tk-shadow">
+  <form class="ticket" id="form" autocomplete="off">
+   <div class="tk-paper">
+    <div class="tk-top"><span id="tkNo">NO.0000</span><span>MIDNIGHT SCREENING</span></div>
+    <div class="tk-head">
+      <h1>두 사람의 상영관</h1>
+      <p class="tk-en">A Theater for Two · Admit Two</p>
+    </div>
+    <dl class="tk-meta">
+      <div><dt>HALL :</dt><dd id="hall"></dd></div>
+      <div><dt>SEAT :</dt><dd id="seat"></dd></div>
+      <div><dt>RATING :</dt><dd id="tkRate"></dd></div>
+      <div><dt>DATE :</dt><dd id="today"></dd></div>
+      <div><dt>TIME :</dt><dd id="tkTime"></dd></div>
+      <div><dt>PRICE :</dt><dd>₩ 0</dd></div>
+    </dl>
+    <div class="tk-cut"></div>
+
+    <div class="tk-sec">
+      <div class="tk-label"><sup>#01</sup><b>주연</b><span>STARRING</span></div>
+      <label class="fill"><span>01</span><input id="nameA" maxlength="12" placeholder="첫 번째 주연 이름" value="서하" aria-label="첫 번째 주연 이름"></label>
+      <label class="fill"><span>02</span><input id="nameB" maxlength="12" placeholder="두 번째 주연 이름" value="이안" aria-label="두 번째 주연 이름"></label>
+    </div>
+
+    <div class="tk-sec">
+      <div class="tk-label"><sup>#02</sup><b>관계</b><span>RELATION</span></div>
+      <div class="opts" id="rel"></div>
+    </div>
+
+    <div class="tk-sec">
+      <div class="tk-label"><sup>#03</sup><b>장르</b><span>GENRE</span><em>최대 2개</em></div>
+      <div class="items" id="genres"></div>
+    </div>
+
+    <div class="tk-sec">
+      <div class="tk-label"><sup>#04</sup><b>상영 버전</b><span>VERSION</span></div>
+      <div class="opts three" id="len"></div>
+    </div>
+
+    <div class="tk-total">
+      <div class="row big"><span>TOTAL</span><span id="tkScenes"></span></div>
+      <div class="row"><span>CAST</span><span id="tkCast"></span></div>
+      <div class="row"><span>GENRE</span><span id="tkGenre"></span></div>
+      <div class="row"><span>RUNNING</span><span id="runHint"></span></div>
+    </div>
+
+    <p class="tk-err" id="err" role="alert"></p>
+    <button class="tk-go" type="submit">상영 시작 <span>ENTER →</span></button>
+
+    <div class="tk-foot">
+      <div class="barcode" id="barcode" aria-hidden="true"></div>
+      <span class="tk-no" id="tkCode"></span>
+      <span class="tk-bye">HAVE A NICE MOVIE</span>
+    </div>
+   </div>
+   <div class="zig" aria-hidden="true"></div>
+  </form>
+  </div>
+  <p class="tk-note">티켓을 채우면 두 사람이 주연인 영화가 상영됩니다. 매번 다른 각본이에요.</p>
+ </div>
+</section>
+
+<!-- THEATER -->
+<section id="theater" hidden>
+ <div class="tk-stage">
+  <div class="tk-shadow wide">
+  <div class="ticket">
+   <div class="tk-paper">
+    <div class="tk-top"><span id="tScene">S#00</span><span>NOW SHOWING</span></div>
+    <div class="tk-head">
+      <h1 class="film" id="tTitle"></h1>
+      <p class="tk-en" id="tGenre"></p>
+    </div>
+    <div class="screen" id="screen">
+      <div class="hud"><span class="rec" id="tc">00:00:00</span><span id="reelNo">REEL 1</span></div>
+      <div class="past" id="past"></div>
+      <p class="sub" id="sub" aria-live="polite"></p>
+      <div class="count" id="count" hidden></div>
+      <div class="theend" id="theend" hidden><div>THE END<small>엔딩 크레딧이 올라갑니다</small></div></div>
+    </div>
+    <div class="reel"><i id="reel"></i></div>
+    <dl class="tk-meta live">
+      <div><dt>ACT :</dt><dd id="tAct">1막</dd></div>
+      <div><dt>RATING :</dt><dd><span class="rate" id="tRate"></span></dd></div>
+      <div><dt>SPEED :</dt><dd id="tSpd">1×</dd></div>
+    </dl>
+    <div class="tk-cut"></div>
+
+    <div class="tk-sec">
+      <div class="tk-label"><sup>#</sup><b>실시간 상태</b><span>LIVE STATUS</span></div>
+      <div class="meters">
+        <div class="m"><span class="k">호감도</span><div class="track"><i id="bAff" style="left:0;background:var(--aff)"></i></div><span class="v" id="vAff">0</span><span class="emo"><span id="eAff">-</span><span class="delta" id="dAff"></span></span></div>
+        <div class="m"><span class="k" id="kA">A</span><div class="track c"><i id="bA" style="background:var(--ca)"></i></div><span class="v" id="vA">0</span><span class="emo"><span id="eA">-</span><span class="delta" id="dA"></span></span></div>
+        <div class="m"><span class="k" id="kB">B</span><div class="track c"><i id="bB" class="hatch"></i></div><span class="v" id="vB">0</span><span class="emo"><span id="eB">-</span><span class="delta" id="dB"></span></span></div>
+        <div class="m"><span class="k">긴장감</span><div class="track"><i id="bT" style="left:0;background:var(--ink);opacity:.45"></i></div><span class="v" id="vT">0</span><span class="emo"><span id="eT">-</span><span></span></span></div>
+      </div>
+    </div>
+
+    <div class="tk-sec">
+      <div class="opts three">
+        <button class="opt" id="spd" aria-pressed="false" type="button">2배속</button>
+        <button class="opt" id="skip" type="button">결말로 건너뛰기</button>
+        <button class="opt" id="stop" type="button">상영 중단</button>
+      </div>
+    </div>
+    <div class="tk-foot"><span class="tk-bye">NOW SHOWING</span></div>
+   </div>
+   <div class="zig" aria-hidden="true"></div>
+  </div>
+  </div>
+ </div>
+</section>
+
+<!-- RESULTS -->
+<section id="results" hidden>
+ <div class="tk-stage">
+  <div class="tk-shadow wide">
+  <div class="ticket">
+   <div class="tk-paper">
+    <div class="res-head">
+      <div class="tk-top"><span id="rNo">NO.0000</span><span>SCREENED · 관람 완료</span></div>
+      <div class="tk-head">
+        <h1 class="film" id="rTitle"></h1>
+        <p class="tk-en" id="rSub"></p>
+      </div>
+      <div class="stamp" id="rStamp"></div>
+      <p class="review" id="rReview"></p>
+    </div>
+    <dl class="tk-meta" id="rTags"></dl>
+    <div class="tk-cut"></div>
+
+    <div class="tk-sec">
+      <div class="tk-label"><sup>#01</sup><b>호감도 곡선</b><span>AFFECTION</span><em>그래프를 눌러 장면 보기</em></div>
+      <div class="chart" id="cAff"></div>
+      <div class="pick" id="pick"></div>
+    </div>
+
+    <div class="tk-sec">
+      <div class="tk-label"><sup>#02</sup><b>두 사람의 기분</b><span>MOOD</span><em>-100 ~ +100</em></div>
+      <div class="legend" id="moodLegend"></div>
+      <div class="chart" id="cMood"></div>
+    </div>
+
+    <div class="tk-sec">
+      <div class="tk-label"><sup>#03</sup><b>긴장감</b><span>TENSION</span></div>
+      <div class="chart" id="cTen"></div>
+    </div>
+
+    <div class="tk-sec">
+      <div class="tk-label"><sup>#04</sup><b>캐릭터 상태</b><span>CHARACTERS</span></div>
+      <div class="chars" id="chars"></div>
+    </div>
+
+    <div class="tk-sec">
+      <div class="tk-label"><sup>#05</sup><b>전체 스크립트</b><span>SCRIPT</span><em id="sCount"></em></div>
+      <ol class="script" id="script"></ol>
+    </div>
+
+    <div class="tk-total" id="rTotal"></div>
+
+    <div class="actions">
+      <button class="tk-go" id="again" type="button">같은 캐스트로 새 영화 <span>NEW →</span></button>
+      <button class="opt" id="replay" type="button">다시 상영</button>
+      <button class="opt" id="copy" type="button">스크립트 복사</button>
+      <button class="opt" id="back" type="button">설정 바꾸기</button>
+      <button class="tk-go alt" id="shareBtn" type="button">결과 이미지 만들기 <span>SHARE ↗</span></button>
+      <span class="copied" id="copied" hidden>스크립트를 복사했어요</span>
+    </div>
+    <div class="share-panel" id="sharePanel" hidden>
+      <div class="tk-label"><sup>#</sup><b>공유용 이미지</b><span>1080 × 1350</span></div>
+      <img id="shareImg" alt="영화 관람 결과 카드 이미지">
+      <div class="share-row">
+        <a class="opt" id="dlBtn" download="두사람의상영관.png">이미지 저장</a>
+        <button class="opt" id="nativeShare" type="button" hidden>앱으로 공유</button>
+        <a class="opt" id="tweetBtn" target="_blank" rel="noopener">트위터에 글쓰기</a>
+      </div>
+      <p class="share-hint">저장 버튼이 안 되면 이미지를 길게 누르거나(모바일) 우클릭해서(PC) 저장하세요. 트위터 글쓰기 창이 열리면 저장한 이미지를 첨부하면 됩니다.</p>
+    </div>
+    <div id="fbWrap"></div>
+
+    <div class="tk-foot">
+      <div class="barcode" id="barcode2" aria-hidden="true"></div>
+      <span class="tk-no" id="rCode"></span>
+      <span class="tk-bye">THANK YOU FOR WATCHING</span>
+    </div>
+   </div>
+   <div class="zig" aria-hidden="true"></div>
+  </div>
+  </div>
+ </div>
+</section>
+
+</div>
+
+<script>
+/* =========================================================
+   대사 데이터
+   각 줄: [지문, 호감도 변화, A 기분 변화, B 기분 변화]
+   토큰: {A} {B} 주연 / {P} 장소 / {T} 소품 / {X} 조연
+   조사 토큰: {A이} {A은} {A을} {A와} {A로} {A아} → 받침에 맞게 변환
+   ========================================================= */
+const G = {
+romance:{name:"로맨스",rate:"12",pc:["#ff6b93","#5a1b3a"],
+ places:["비 오는 버스 정류장","골목 끝 헌책방","한강 둔치","문 닫기 직전의 카페","옥상 정원","겨울 바닷가","작은 꽃집","불꽃축제가 끝난 다리 위"],
+ things:["우산","손편지","머플러","이어폰 한쪽","낡은 필름 카메라","은반지","책갈피"],
+ extras:["눈치 빠른 단골손님","오지랖 넓은 친구","카페 사장님","{B}의 전 연인"],
+ titles:["{A}, 그리고 {B}","우리가 우산을 같이 쓰던 계절","{B}에게 보내지 못한 편지","그해 {A}의 겨울","안녕, {B}","3시 12분의 답장"],
+ open:[
+  ["{P}에서 {A와} {B}의 어깨가 부딪혔다. 떨어진 {T을} 동시에 주우려다 손끝이 닿는다.",8,6,5],
+  ["{A은} {P}에서 처음으로 {B을} 보았다. 그날따라 시선이 이상하게 오래 머물렀다.",6,5,0],
+  ["주문이 꼬여 {A}의 음료가 {B}에게 나갔다. 두 사람은 어색하게 웃으며 잔을 바꿨다.",5,3,4],
+  ["{P}. 비를 피하던 {B이} 우산 없이 서 있는 {A을} 발견한다.",6,2,4],
+  ["친구의 소개팅 자리, 마주 앉은 {A와} {B}. 둘 다 오기 싫었다는 얼굴이다.",2,-3,-2],
+  ["{A이} 잃어버린 {T을} {B이} 들고 나타났다. “이거, 당신 거죠?”",7,6,3],
+  ["두 사람이 처음 만났다. 그들은 짧게 눈빛을 교환한다.",5,3,3]],
+ build:[
+  ["두 사람은 {P}에서 우연히 다시 마주쳤다. 이번엔 {B이} 먼저 인사를 건넸다.",7,6,4],
+  ["{A은} {B}의 이름을 몇 번이고 속으로 불러본다.",5,6,0],
+  ["{B이} 건넨 {T을} {A은} 버리지 못하고 서랍 깊숙이 넣어 두었다.",6,4,2],
+  ["밤새 이어진 메시지. 마지막 답장은 새벽 3시 12분이었다.",8,5,5],
+  ["{A은} {B}의 습관 하나를 알아챘다. 웃을 때 왼쪽 눈이 먼저 감긴다는 것.",6,5,2],
+  ["같이 걷던 길, {B이} 슬쩍 차도 쪽으로 자리를 바꿨다.",7,5,3],
+  ["{A이} 좋아하는 노래를 {B}도 알고 있었다. 두 사람은 이어폰을 한쪽씩 나눠 꼈다.",8,6,6],
+  ["{B은} 괜히 {A}의 SNS를 처음부터 끝까지 넘겨본다.",4,0,5],
+  ["둘만 아는 농담이 하나 생겼다.",6,5,5],
+  ["{A은} {B}에게 줄 선물을 고르느라 한 시간을 썼다.",5,4,0]],
+ rise:[
+  ["{P}, 가로등 아래에서 두 사람의 거리가 한 뼘으로 줄어든다.",10,8,8],
+  ["{B이} 말을 멈춘다. “{A}, 나 사실…” 그때 휴대폰이 울렸다.",4,-2,-3],
+  ["손등이 스쳤다. 이번엔 누구도 손을 빼지 않았다.",11,9,9],
+  ["{A은} 처음으로 {B} 앞에서 울었다. {B은} 아무 말 없이 곁에 있어 주었다.",10,-3,4],
+  ["감정이 고조된다. 둘 다 같은 말을 삼키고 있다.",6,3,3],
+  ["{B이} {A}의 머리에 붙은 꽃잎을 떼어 준다. 시간이 잠깐 멈춘 것 같았다.",9,8,6],
+  ["“오늘, 집에 가기 싫다.” {A}의 혼잣말을 {B이} 들어버렸다.",8,4,7],
+  ["{P}에서 두 사람은 처음으로 서로의 이름을 부드럽게 불렀다.",8,6,6]],
+ trouble:[
+  ["{X이} 돌아왔다. {A은} 멀리서 {B}의 곁에 선 그 모습을 보고 말았다.",-12,-15,-3],
+  ["문제가 생겼다. {B}에게 해외 발령 소식이 떨어진다.",-6,-8,-12],
+  ["{A}의 메시지 옆 숫자 1이 사라졌다. 답장은 오지 않는다.",-8,-12,-4],
+  ["오해가 쌓였다. {B은} {A}의 침묵을 거절로 받아들였다.",-14,-6,-14],
+  ["{A}의 가족이 두 사람의 만남을 반대한다.",-7,-12,-6],
+  ["약속 장소에 {B은} 나타나지 않았다. {A은} {P}에서 두 시간을 기다렸다.",-10,-14,-5],
+  ["{A이} 숨겨온 비밀이 오늘 드러났다.",-13,-10,-12],
+  ["사소한 말다툼이 큰 싸움이 되었다. {A은} 해서는 안 될 말을 해버렸다.",-15,-10,-14]],
+ climax:[
+  ["{A은} 공항으로 달린다. 탑승 마감까지 10분.",8,-4,2],
+  ["빗속에서 {B이} 소리친다. “{A}, 나 너 좋아해!”",15,10,8],
+  ["두 사람은 {P}에서 마주 섰다. 이번엔 피하지 않기로 한다.",10,6,6],
+  ["{A은} 끝내 {B}의 손을 놓았다. 그게 맞다고 믿었다.",-15,-15,-12],
+  ["{B은} {A}에게 마지막 편지를 남긴다. 봉투 안에는 {T}도 함께 들어 있었다.",5,-5,-3],
+  ["“가지 마.” 처음으로 {A이} 솔직해졌다.",13,8,10]],
+ resolve:[
+  ["두 사람은 {P}에서 오래 이야기를 나눴다. 쌓인 오해가 조금씩 풀렸다.",10,8,8],
+  ["{B이} {A}의 손을 잡았다. 이번엔 깍지를 꼈다.",12,10,10],
+  ["{A은} {B}에게 그동안 하지 못한 말을 전부 했다.",9,7,6],
+  ["두 사람은 처음 만났던 곳으로 돌아갔다.",7,6,6],
+  ["{B은} 출국을 미뤘다. 이유는 묻지 않아도 알 수 있었다.",11,9,6],
+  ["{A와} {B은} 서로의 상처를 들여다봤다. 그리고 천천히 끌어안았다.",10,6,6],
+  ["{A은} 연락처에서 {B}의 이름을 지우려다, 끝내 지우지 못했다.",-4,-6,0]],
+ good:[
+  ["두 사람은 서로의 마음을 확인했다. {P}의 노을이 유난히 붉었다.",8,10,10],
+  ["1년 뒤, {A}의 손가락에 {B이} 끼워준 반지가 반짝인다.",8,10,10],
+  ["“앞으로도 잘 부탁해.” 두 사람은 같은 우산 아래로 걸어간다.",6,8,8],
+  ["{A와} {B은} 서로를 보고 웃었다. 이야기는 이제 시작이다.",6,9,9],
+  ["엔딩 크레딧이 올라가는 동안에도 두 사람은 손을 놓지 않았다.",6,8,8]],
+ openE:[
+  ["두 사람은 각자의 길을 걷는다. 하지만 {A은} 가끔 뒤를 돌아본다.",0,0,0],
+  ["3년 후, {P}. 누군가 {A}의 이름을 부른다. 화면이 암전된다.",2,3,3],
+  ["{B은} 답장을 쓰다 지우기를 반복한다. 전송 버튼 위에서 손가락이 멈춘다.",0,-2,-2],
+  ["“다음에 또 보자.” 그 다음이 언제인지는 아무도 모른다.",0,0,0]],
+ bad:[
+  ["{A와} {B은} 끝내 엇갈렸다. 같은 날, 같은 역에서, 반대 방향 열차를 탔다.",-5,-10,-10],
+  ["{B}의 청첩장이 {A}에게 도착했다.",-8,-15,-5],
+  ["두 사람은 서로를 놓아주기로 했다. 그게 사랑이라고 믿으면서.",-3,-8,-8],
+  ["{A은} {P}에 홀로 남았다. {T}만이 그날을 기억한다.",-5,-12,-6]]
+},
+
+drama:{name:"휴먼 드라마",rate:"all",pc:["#e0a35a","#3b2414"],
+ places:["재개발을 앞둔 동네","낡은 동네 병원","새벽 수산시장","야간 편의점","시골 버스 종점","문 닫은 공장","24시 국밥집"],
+ things:["오래된 사진 한 장","손때 묻은 수첩","아버지의 시계","녹음기","기차표 두 장","낡은 자전거"],
+ extras:["철물점 사장님","어린 조카","은퇴한 선생님","옆집 할머니"],
+ titles:["내일도 와, {B}","{P}의 두 사람","식은 국밥 두 그릇","{A}의 수첩","우리가 가족이 되는 법","일요일의 전화"],
+ open:[
+  ["{P}. {A은} 밀린 월세를 받으러 왔고, {B은} 그 집 세입자였다.",0,-5,-8],
+  ["{B은} {P}에서 야간 근무 중이다. 새벽 2시, {A이} 컵라면 하나를 들고 계산대에 섰다.",4,0,2],
+  ["아버지의 장례식, 조문객 명단에 낯선 이름이 하나 있었다. {B}의 이름이었다.",2,-8,-3],
+  ["{A은} 첫 출근 날 {B}의 자리를 물려받았다. {B}에게는 오늘이 마지막 근무일이다.",3,4,-4],
+  ["{P}, 같은 버스를 놓친 두 사람이 정류장 벤치에 나란히 앉았다.",4,-2,-2],
+  ["{X}의 부탁으로 {A와} {B이} 한 지붕 아래 살게 되었다.",2,-3,-3],
+  ["두 사람이 처음 만났다. 서로를 잠깐 훑어보고는 고개를 돌린다.",2,0,0]],
+ build:[
+  ["{A은} 매일 같은 시간에 {B}의 가게에 들른다. 주문은 늘 똑같다.",6,3,4],
+  ["{B은} {A}의 {T}에 얽힌 이야기를 처음 들었다.",3,0,3],
+  ["둘은 {P}에서 국밥을 나눠 먹었다. 말은 없었지만 불편하지 않았다.",7,4,4],
+  ["{A은} {B}의 낡은 자전거 체인을 몰래 고쳐 두었다.",6,3,5],
+  ["{X이} 두 사람을 보며 웃는다. “둘이 꽤 닮았네.”",5,3,3],
+  ["{B은} 처음으로 {A}에게 자기 이야기를 꺼냈다. 고향, 그리고 떠나온 이유.",8,2,4],
+  ["비 오는 날, {A은} 우산 하나를 {B}의 문 앞에 두고 갔다.",6,3,5],
+  ["{A와} {B은} 같은 꿈을 꾸고 있었다. 작은 가게 하나를 여는 것.",8,6,6],
+  ["{B이} 끓인 미역국은 이상하게 엄마 맛이 났다. {A은} 그릇을 비우고 한참 앉아 있었다.",7,5,4]],
+ rise:[
+  ["{A은} 술에 취해 {B}에게 가장 숨기고 싶던 이야기를 털어놓았다.",9,-4,2],
+  ["{B은} {A}의 등을 두드렸다. “너 혼자 잘못한 거 아니야.”",10,6,5],
+  ["두 사람은 {P}에서 해 뜨는 걸 처음으로 같이 봤다.",8,7,7],
+  ["감정이 고조된다. 서로에게 기대도 된다는 걸 알아버렸다.",7,4,4],
+  ["{A이} {B}의 생일을 기억하고 있었다. {B}조차 잊고 있던 날이었다.",10,5,9],
+  ["{X이} 쓰러졌다. 병원 복도에서 {A와} {B은} 서로의 손을 꼭 쥐었다.",8,-8,-8],
+  ["{B은} {A}에게 {T을} 건넸다. “이제 너한테 맡길게.”",9,5,4]],
+ trouble:[
+  ["문제가 생겼다. {P}에 철거 통보가 붙었다.",-3,-12,-12],
+  ["{A}의 빚쟁이들이 {B}의 가게까지 찾아왔다.",-10,-12,-10],
+  ["{B은} {A이} 자기를 동정해왔다고 오해했다.",-14,-6,-12],
+  ["{A은} 서울의 좋은 일자리 제안을 받았다. 떠나야 한다.",-5,-3,-10],
+  ["{X이} 세상을 떠났다. 두 사람은 장례식장 복도에 말없이 앉아 있었다.",3,-15,-15],
+  ["{B}의 오래된 거짓말이 드러났다. 이름조차 진짜가 아니었다.",-15,-10,-12],
+  ["{A은} 해서는 안 될 말을 했다. “너 같은 사람이 뭘 알아.”",-15,-8,-14],
+  ["돈 문제로 두 사람은 처음으로 크게 다퉜다.",-12,-10,-10]],
+ climax:[
+  ["{A은} 서울행 버스표를 찢었다.",12,6,8],
+  ["{B은} 모든 걸 털어놓기로 했다. 진짜 이름부터.",10,-3,6],
+  ["{P}, 두 사람은 비를 맞으며 서로에게 소리쳤다. 그리고 동시에 울었다.",6,-6,-6],
+  ["{A은} 마지막 남은 돈으로 {B}의 빚을 갚았다.",13,-4,4],
+  ["{B은} 짐을 쌌다. {A}에게는 쪽지 한 장만 남겼다.",-12,-10,-10],
+  ["{A은} {B}의 문을 두드렸다. 열 번, 스무 번.",8,2,4]],
+ resolve:[
+  ["두 사람은 {P}에서 다시 마주 앉았다. 국밥 두 그릇이 놓였다.",9,6,6],
+  ["{A은} 처음으로 “미안해”라고 말했다. {B은} “나도”라고 답했다.",11,7,7],
+  ["{B은} {A}의 수첩 마지막 장에 무언가를 적어 넣었다.",7,4,5],
+  ["두 사람은 작은 가게의 간판을 함께 달았다.",10,9,9],
+  ["{X이} 남긴 편지를 함께 읽었다. 둘의 이름이 나란히 적혀 있었다.",9,4,4],
+  ["{A와} {B은} 다시 일어서기로 했다. 천천히, 둘이서.",9,7,7],
+  ["{A은} 결국 혼자 떠났다. 하지만 매주 일요일, 전화를 건다.",-2,-2,2]],
+ good:[
+  ["서로가 서로의 가족이 되어 있었다는 걸, 두 사람은 확인했다.",8,10,10],
+  ["{P}의 작은 가게에 불이 켜진다. 간판에는 두 사람의 이름이 적혀 있다.",7,9,9],
+  ["“내일도 와.” “응, 내일도.” 평범한 대사로 영화가 끝난다.",6,8,8],
+  ["두 사람은 나란히 앉아 해 지는 걸 바라본다. 아무 일도 없어서 좋은 저녁이다.",6,8,8]],
+ openE:[
+  ["각자의 자리로 돌아간 두 사람. 그래도 가끔 같은 하늘을 본다.",0,0,0],
+  ["{B}의 가게 문에 ‘잠시 쉽니다’ 팻말이 걸려 있다. 언제 다시 열지는 적혀 있지 않다.",0,-3,-3],
+  ["{A은} {T을} 쥔 채 버스에 오른다. 창밖으로 {B}의 모습이 멀어진다.",-2,-3,-3]],
+ bad:[
+  ["두 사람은 끝내 서로를 이해하지 못했다. {P}도 사라졌다.",-6,-12,-12],
+  ["{B}의 번호는 이제 없는 번호라고 나온다.",-8,-14,-8],
+  ["{A은} {T을} 강물에 던졌다. 그것으로 끝이었다.",-6,-12,-8]]
+},
+
+sf:{name:"SF",rate:"12",pc:["#4fb4ff","#0c1d3a"],
+ places:["궤도 정거장 ‘하제’","화성 제3돔","폐기된 연구선","지하 서버실","냉동수면 캡슐실","2187년의 서울 상공","블랙홀 관측 기지"],
+ things:["손상된 메모리 칩","구형 통신기","좌표가 담긴 홀로그램","시간 지연 메시지","안드로이드 코어"],
+ extras:["함선 AI ‘노아’","연합 사령부","정체불명의 신호","복제인간 7호"],
+ titles:["궤도 위의 {B}","{A}: 동기화율 100%","14분의 지연","코드명 {B}","{A을} 기억하는 기계","마지막 좌표"],
+ open:[
+  ["{P}. 냉동수면에서 깨어난 {A}의 눈앞에 {B이} 서 있었다. 예정보다 40년 늦은 기상이었다.",3,-6,0],
+  ["{A은} 인간이고, {B은} 인간이 아니다. 두 사람은 같은 임무에 배정되었다.",1,0,-2],
+  ["{P}에 경보가 울렸다. 생존자는 {A와} {B}, 단 두 명이다.",4,-8,-8],
+  ["기록상 {A은} 3년 전에 사망했다. 그런데 지금 {B}의 눈앞에 있다.",2,-3,-10],
+  ["{A이} 폐기장에서 주운 {T}에서 {B}의 목소리가 흘러나왔다.",5,4,2],
+  ["두 사람이 처음 만났다. 헬멧 바이저 너머로 눈빛이 교환된다.",4,2,2],
+  ["{X이} 두 사람을 파트너로 지정했다. 확률상 최적의 조합이라고 했다.",2,-2,-2]],
+ build:[
+  ["{B은} {A}의 심박수가 빨라진 걸 감지했다. 이유는 기록하지 않기로 했다.",7,4,3],
+  ["둘은 {P}에서 지구가 떠오르는 걸 바라봤다. {A은} 고향 이야기를 했다.",7,5,4],
+  ["{A은} {B}에게 커피 맛을 설명하려 애쓴다. 생각보다 어렵다.",6,5,5],
+  ["{B은} 처음으로 명령에 없는 행동을 했다. {A}의 손상된 의수를 밤새 고친 것.",9,5,4],
+  ["통신 지연 14분. {B은} 그 14분 동안 답장을 열 번 고쳐 썼다.",6,3,4],
+  ["{X이} 경고한다. “두 대원의 동기화율이 비정상적으로 높습니다.”",5,2,2],
+  ["{B은} 별에 이름을 붙여달라고 했다. {A은} 그 별에 {B}의 이름을 붙였다.",9,6,8],
+  ["무중력 속에서 {A}의 머리카락이 떠다닌다. {B은} 그 장면을 메모리에 영구 저장했다.",8,3,6],
+  ["두 사람은 {T}의 암호를 함께 풀기 시작했다.",5,4,4]],
+ rise:[
+  ["산소 카트리지가 하나 남았다. {B은} 망설임 없이 {A}에게 건넸다.",11,-4,2],
+  ["“너한테도 감정이 있어?” {A}의 질문에 {B은} 0.8초 동안 대답하지 못했다.",8,3,4],
+  ["감정이 고조된다. 함선 내부 온도가 0.3도 올랐다.",6,4,4],
+  ["{A은} {B}의 코어에 손을 얹었다. 따뜻했다.",10,6,8],
+  ["{P}의 창 너머로 오로라가 번졌다. 두 사람은 아무 말 없이 그걸 바라봤다.",8,7,7],
+  ["{B은} 오래된 영화 속 키스 장면을 열두 번 재생해 보았다.",6,2,6],
+  ["{A이} 정신을 잃었다. 깨어났을 때 {B}의 손이 {A}의 손을 잡고 있었다.",10,4,6]],
+ trouble:[
+  ["문제가 생겼다. {X로}부터 {B}의 기억 초기화 명령이 내려왔다.",-6,-12,-14],
+  ["{P}의 선체에 균열이 생겼다. 탈출 포드는 1인용이다.",-2,-14,-12],
+  ["{A은} {B}의 진짜 임무를 알게 되었다. 처음부터 {A을} 감시하는 것이었다.",-15,-14,-8],
+  ["시간 왜곡. {A}에게는 3일, {B}에게는 30년이 흘렀다.",-8,-10,-12],
+  ["{B}의 시스템에 바이러스가 침투했다. {B은} {A을} 적으로 인식하기 시작한다.",-14,-12,-10],
+  ["{X이} 함선의 통제권을 빼앗았다.",-4,-12,-12],
+  ["{A}의 복제인간이 나타났다. {B은} 누가 진짜인지 판별하지 못한다.",-10,-12,-10],
+  ["{T이} 폭주한다. 남은 시간 4분 32초.",0,-10,-10]],
+ climax:[
+  ["{B은} 자신의 기억을 대가로 {A을} 구하기로 계산했다. 성공 확률 12%.",12,-4,4],
+  ["{A은} 매뉴얼을 무시하고 {B}의 코어로 손을 뻗었다.",10,4,4],
+  ["“{A}, 나는 너를 선택할게.” {B}의 목소리에서 노이즈가 사라졌다.",15,8,10],
+  ["탈출 포드가 발사되었다. 안에 탄 건 {A} 혼자였다.",-12,-15,-6],
+  ["두 사람은 {P}에서 마지막 좌표를 입력했다. 손이 동시에 버튼 위에 놓였다.",10,6,6],
+  ["{A은} 초기화 명령을 거부하고 반역자가 되었다.",12,5,8]],
+ resolve:[
+  ["{B}의 메모리 백업, 마지막 파일명은 ‘{A}’였다.",10,6,6],
+  ["두 사람은 고장 난 우주선에서 지구의 노래를 틀었다.",8,7,7],
+  ["{A은} {B}의 시스템을 다시 부팅했다. 첫 화면에 떠오른 단어는 {A}의 이름이었다.",12,9,8],
+  ["{X}와의 통신이 끊겼다. 이제 둘에게 명령하는 존재는 없다.",8,6,6],
+  ["두 사람은 새로운 행성의 첫 좌표에 함께 이름을 새겼다.",10,8,8],
+  ["{B은} 감정 모듈을 삭제하지 않기로 했다. 아파도 괜찮다고 했다.",11,5,7],
+  ["{A은} {T을} 끝까지 놓지 않았다. 그 안에 {B}의 목소리가 남아 있었다.",4,-4,0]],
+ good:[
+  ["서로의 존재를 확인한 두 사람. 함선은 새로운 은하로 항로를 잡는다.",8,10,10],
+  ["“다음 행성에서도 같이 깨어나자.” 두 개의 캡슐이 나란히 잠든다.",7,8,8],
+  ["{B}의 로그 마지막 줄 — 감정 상태: 행복. 정의 불가. 유지 희망.",8,8,10],
+  ["지구 귀환. 착륙 직후 {A은} {B}의 손부터 찾았다.",7,9,9]],
+ openE:[
+  ["{B}의 코어가 다시 켜질지는 아무도 모른다. {A은} 매일 아침 전원 버튼을 누른다.",0,-2,0],
+  ["두 사람은 서로 다른 시간대에 남겨졌다. 신호는 아직 도착하지 않았다.",0,-3,-3],
+  ["엔딩 직전, 정체불명의 신호가 수신된다. 발신자: {B}.",2,2,0]],
+ bad:[
+  ["{B}의 기억은 초기화되었다. “처음 뵙겠습니다.” {B이} 웃으며 말했다.",-8,-15,0],
+  ["{A은} 지구로 돌아왔고, {B은} 우주에 남았다. 교신은 그날 이후 끊겼다.",-6,-12,-12],
+  ["{P}의 불빛이 하나씩 꺼진다. 마지막까지 켜져 있던 건 {B}의 눈이었다.",-5,-12,-14]]
+},
+
+zombie:{name:"좀비 아포칼립스",rate:"15",pc:["#9bbf4a","#1c2410"],
+ places:["폐쇄된 대형마트","감염 3일 차의 지하철역","버려진 고등학교 옥상","바리케이드를 친 아파트 14층","고속도로 휴게소","격리 구역 외곽","불 꺼진 병원"],
+ things:["마지막 통조림","산탄총","백신 샘플","무전기","차 키","붕대 한 롤","낡은 지도"],
+ extras:["생존자 캠프","군 수송대","낯선 생존자 무리","감염된 동료"],
+ titles:["{A}, 살아 있니","새벽까지 72시간","{B}의 무전기","마지막 통조림","세상이 끝나도 {A와}","북쪽으로"],
+ open:[
+  ["{P}. 셔터를 내리려던 {A}의 손을 {B이} 붙잡았다. “잠깐, 나도 들어갈게!”",4,-6,-4],
+  ["{A은} 마지막 남은 {T을} 두고 {B와} 대치했다.",-2,-6,-6],
+  ["감염 사태 3일 차. {B은} {P}에서 무전기 너머 {A}의 목소리를 들었다.",5,0,4],
+  ["{A이} 쏜 총알이 {B}의 등 뒤 좀비를 쓰러뜨렸다. 두 사람의 첫 만남이었다.",6,2,3],
+  ["{B은} {A}의 팔에 난 상처부터 확인했다. 물린 자국은 아니었다.",3,-3,-2],
+  ["두 사람이 처음 만났다. 서로에게 총구를 겨눈 채로.",0,-5,-5],
+  ["{X}에서 쫓겨난 {A}, 혼자 버티던 {B}. 둘은 일단 같이 움직이기로 했다.",3,-4,-2]],
+ build:[
+  ["둘은 {P}에서 하룻밤을 버텼다. 교대로 보초를 섰지만 {B은} 한숨도 자지 않았다.",6,-2,-2],
+  ["{A은} {B}에게 장전하는 법을 가르쳐줬다. 손이 겹쳤다.",7,4,4],
+  ["{B은} 마지막 초콜릿을 반으로 쪼개 {A}에게 건넸다.",8,6,3],
+  ["무전기에서 가족의 목소리는 들리지 않았다. {B이} {A}의 어깨를 감싸 안았다.",8,-8,-2],
+  ["두 사람은 {T을} 챙겨 북쪽으로 향했다. 안전지대가 있다는 소문을 믿으며.",4,4,4],
+  ["좀비 떼를 피해 숨은 차 안에서 {B은} {A}의 손을 처음 잡았다. 무서워서였다고 둘러댔다.",8,2,5],
+  ["{A은} 매일 밤 벽에 날짜를 긋는다. {B은} 그 옆에 작게 웃는 얼굴을 그려 넣는다.",7,5,5],
+  ["{X와} 마주쳤다. 둘은 서로의 등을 맡기기로 했다.",6,0,0],
+  ["드럼통 불 앞에서 {B은} 세상이 망하기 전 꿈이 뭐였는지 이야기했다.",7,3,3]],
+ rise:[
+  ["{B이} 좀비에게 붙잡혔다. {A은} 생각할 틈도 없이 몸을 던졌다.",12,-6,-4],
+  ["“너 없으면 나 진짜 끝이야.” 피 묻은 손으로 {A이} 말했다.",10,2,6],
+  ["감정이 고조된다. 세상이 끝나가는데, 하필 지금.",7,3,3],
+  ["{P}. 불타는 도시를 내려다보며 두 사람은 처음으로 웃었다.",9,6,6],
+  ["{B은} 자기가 물리면 망설이지 말고 쏘라고 했다. {A은} 대답하지 않았다.",8,-6,-4],
+  ["둘은 잠든 서로의 숨소리를 확인하며 밤을 보냈다.",8,4,4],
+  ["{A은} 무너진 꽃집에서 살아남은 화분 하나를 {B}에게 건넸다.",9,5,8]],
+ trouble:[
+  ["문제가 생겼다. {B}의 다리에 물린 자국이 있다.",-2,-15,-15],
+  ["{X이} 두 사람을 갈라놓았다. 한 명만 받아주겠다고 한다.",-6,-12,-12],
+  ["{T을} 들고 혼자 사라지려는 {B을} {A이} 붙잡았다.",-14,-12,-8],
+  ["차에 기름이 떨어졌다. 뒤에서 좀비 떼가 몰려온다.",0,-12,-12],
+  ["{A}의 가족이 좀비가 되어 나타났다.",2,-18,-8],
+  ["{B은} {A}의 판단 때문에 동료가 죽었다고 생각한다.",-15,-10,-14],
+  ["{P}의 바리케이드가 무너졌다.",-1,-14,-14],
+  ["무전이 끊겼다. 안전지대 같은 건 처음부터 없었다.",0,-14,-12]],
+ climax:[
+  ["{A은} {B을} 업고 뛴다. 출구까지 200미터.",12,-4,2],
+  ["{B은} 좀비 떼를 끌고 반대쪽으로 달렸다. {A}만은 살리기 위해서.",10,-12,-4],
+  ["{A은} 마지막 백신 샘플을 {B}의 팔에 꽂았다.",14,-2,6],
+  ["총알은 한 발 남았다. {A은} 총을 내려놓았다.",8,-6,-6],
+  ["{P}의 문이 닫히기 직전, 두 사람의 손이 맞잡혔다.",12,6,6],
+  ["{B은} 끝내 {A}에게 총구를 겨누지 못했다.",6,-8,-8]],
+ resolve:[
+  ["새벽이 왔다. 두 사람은 살아남았다.",10,10,10],
+  ["{B}의 열이 내렸다. 백신이 통했다.",10,10,12],
+  ["둘은 바닷가 작은 마을에 바리케이드를 치고 텃밭을 일구기 시작했다.",9,8,8],
+  ["{A은} 벽에 날짜 대신 {B}의 이름을 적었다.",8,6,4],
+  ["{X}에 도착했다. 두 사람은 같은 텐트를 배정받았다.",8,7,7],
+  ["{A와} {B은} 서로의 상처에 붕대를 감아주며 오래 웃었다.",9,7,7],
+  ["{B은} 끝내 돌아오지 않았다. {A은} 그 자리에서 사흘을 기다렸다.",-6,-14,-4]],
+ good:[
+  ["세상은 끝났지만, 두 사람의 이야기는 끝나지 않았다.",8,10,10],
+  ["1년 후. 텃밭에 첫 토마토가 열렸다. {A이} 그걸 {B}에게 건넨다.",7,9,9],
+  ["“내일도 살아 있자.” 매일 밤의 약속이 1000번째를 넘겼다.",8,9,9],
+  ["서로를 끝까지 지켜낸 두 사람. 지평선 너머로 해가 뜬다.",7,9,9]],
+ openE:[
+  ["엔딩 직전, 무전기에서 잡음 섞인 목소리가 들린다. 두 사람은 서로를 바라본다.",1,0,0],
+  ["{B}의 상처는 아물었다. 하지만 {A은} 가끔 {B}의 눈동자를 오래 들여다본다.",0,-3,0],
+  ["두 사람은 각자 다른 캠프로 향했다. 다시 만나자는 약속만 남긴 채.",-2,-4,-4]],
+ bad:[
+  ["{A은} 혼자 살아남았다. {B}의 무전기는 아직도 켜져 있다.",-8,-18,-10],
+  ["마지막 장면, {B}의 눈동자가 탁해진다. {A은} 눈을 감았다.",-6,-18,-18],
+  ["두 사람은 서로를 버렸다. 살기 위해서였다.",-12,-12,-12]]
+},
+
+fantasy:{name:"판타지",rate:"12",pc:["#c9a2ff","#26173f"],
+ places:["마탑 꼭대기 서고","왕도의 가면무도회","정령의 숲","북부 국경 요새","용이 잠든 설산","마녀의 오두막","몰락한 신전"],
+ things:["금이 간 수정구","계약의 반지","봉인된 마검","금서 한 권","기억을 담는 물약","왕가의 문장"],
+ extras:["마왕군","대신관","황태자","고룡 세르바"],
+ titles:["{B}의 진명","은빛 깃털의 맹세","마탑의 {A}","{A와} 백 년의 저주","운명의 실","다음 생에도, {B}"],
+ open:[
+  ["{P}에서 {A와} {B}의 마법이 정면으로 충돌했다. 둘 다 무사했지만 탑의 지붕이 날아갔다.",2,-3,-3],
+  ["{A은} 소환 의식을 치렀다. 마법진 위에 나타난 건 악마가 아니라 {B}였다.".replace("{B}였다","{B}의 모습이었다"),4,-2,-6],
+  ["{B은} {A}의 호위 기사로 임명되었다. 첫날부터 마음에 들지 않는다.",-2,-4,-4],
+  ["{P}. 가면 너머로 시선이 마주쳤다. {B은} 그 눈동자의 색을 잊지 못했다.",8,6,6],
+  ["{A은} {T을} 훔쳐 달아나다 {B와} 부딪혔다.",3,-2,-2],
+  ["두 사람이 처음 만났다. 운명의 실이 희미하게 빛났다.",6,3,3],
+  ["백 년 동안 잠든 {A을} 깨운 건 길을 잃은 {B}의 손길이었다.",6,2,2]],
+ build:[
+  ["{B은} 서툰 솜씨로 {A}에게 치유 마법을 걸었다. 상처보다 얼굴이 더 빨개졌다.",8,4,6],
+  ["둘은 {P}에서 별이 쏟아지는 밤을 보냈다. {A은} 고향의 전설을 들려주었다.",7,5,5],
+  ["{A은} {B}의 검 손잡이에 몰래 수호 문양을 새겼다.",7,4,2],
+  ["{B은} 마법을 쓸 줄 모른다. 대신 {A}의 마나가 바닥날 때마다 업어서 옮긴다.",8,3,4],
+  ["{X}의 추격을 피해 두 사람은 정령의 숲으로 숨어들었다.",5,-3,-3],
+  ["{A은} 매일 밤 {B}의 모습을 수정구에 비춰본다. 들키지 않기를 바라며.",6,4,0],
+  ["{B은} 시장에서 산 싸구려 머리끈을 {A}에게 건넸다. {A은} 그걸 왕관보다 아꼈다.",9,7,5],
+  ["두 사람은 {T}에 얽힌 예언의 첫 구절을 해독했다.",4,4,4],
+  ["{A}의 정체가 왕족이라는 걸 {B은} 아직 모른다.",3,-2,2]],
+ rise:[
+  ["{B}의 손끝에서 꽃이 피어났다. 처음으로 마법이 성공한 순간, 옆에는 {A이} 있었다.",9,6,9],
+  ["“당신을 지키는 건 명령이 아니라 내 선택입니다.” {B이} 무릎을 꿇었다.",11,8,6],
+  ["감정이 고조된다. 둘의 마나가 공명하기 시작했다.",8,5,5],
+  ["{A은} 금기를 어기고 {B}에게 자신의 진명(眞名)을 알려주었다.",12,4,6],
+  ["{P}, 두 사람은 음악이 끝나도 춤을 멈추지 않았다.",10,8,8],
+  ["{B}의 상처를 치료하던 {A}의 손이 떨렸다.",8,-2,4],
+  ["{A은} {B}에게 은빛 깃털을 건넸다. 정령족에게 그것은 청혼의 의미다. {B은} 모른다.",7,6,3]],
+ trouble:[
+  ["문제가 생겼다. {B}의 몸에 마왕의 각인이 떠올랐다.",-4,-12,-15],
+  ["{X이} {A}의 정략결혼을 발표했다.",-10,-14,-12],
+  ["예언이 밝혀졌다. 둘 중 하나가 세상을 멸망시킨다.",-8,-14,-14],
+  ["{A은} {B}의 기억을 지워야만 저주를 풀 수 있다는 걸 알게 되었다.",-6,-15,-4],
+  ["{B은} {A이} 처음부터 자신을 이용하려고 소환했다는 사실을 알았다.",-15,-8,-15],
+  ["{T이} 깨졌다. 봉인이 풀리기 시작한다.",-2,-12,-12],
+  ["{X이} 두 사람을 반역자로 지명 수배했다.",0,-10,-10],
+  ["{A}의 마력이 폭주해 {B}에게 상처를 입혔다.",-10,-14,-8]],
+ climax:[
+  ["{B은} 마검을 뽑아 {X}의 앞을 막아섰다. “이 사람은 건드리지 마.”",13,6,6],
+  ["{A은} 자신의 생명력을 전부 {B}에게 흘려보냈다.",14,-8,4],
+  ["두 사람의 마나가 하나로 섞였다. {P} 전체가 빛으로 물들었다.",12,8,8],
+  ["{A은} 예언을 따르기로 했다. {B을} 향해 지팡이를 들어 올렸다.",-14,-14,-14],
+  ["{B은} 계약을 파기했다. 이제 둘을 묶는 건 없다. 그래도 {B은} 떠나지 않았다.",12,6,8],
+  ["“이번 생에서 못 하면, 다음 생에서 찾아갈게.”",8,-4,-4]],
+ resolve:[
+  ["봉인은 다시 닫혔다. 두 사람은 무너진 {P}에서 서로를 끌어안았다.",11,9,9],
+  ["{A은} 왕관을 내려놓고 {B}의 손을 잡았다.",12,8,9],
+  ["{B}의 각인이 꽃잎처럼 흩어졌다. 저주가 풀렸다.",11,8,12],
+  ["두 사람은 이름 없는 마을에서 작은 약초 가게를 열었다.",9,8,8],
+  ["{X이} 마침내 무릎을 꿇었다. 왕국에 새벽이 왔다.",8,8,8],
+  ["{A은} 지워진 기억 대신 매일 {B}에게 처음부터 이야기를 들려준다.",7,4,6],
+  ["{B은} 긴 잠에 빠졌다. {A은} 깨어날 날까지 곁을 지키기로 했다.",2,-8,0]],
+ good:[
+  ["운명의 실이 단단히 묶였다. 두 사람은 서로를 선택했다.",8,10,10],
+  ["음유시인들은 오래도록 두 사람의 이야기를 노래했다.",7,8,8],
+  ["{P}에 봄이 왔다. 은빛 깃털을 단 {B이} {A}에게 손을 내민다.",8,9,9],
+  ["“다음 생에도 찾아갈게.” “이번 생도 아직 많이 남았어.”",8,9,9]],
+ openE:[
+  ["백 년 후, 같은 눈동자를 가진 누군가가 {P}의 문을 두드린다.",1,0,0],
+  ["{B}의 검이 {A}의 무덤가에 꽂혀 있다. 하지만 무덤은 비어 있다.",0,-4,-4],
+  ["두 사람은 서로 다른 세계로 돌아갔다. 수정구만이 가끔 빛난다.",-2,-4,-4]],
+ bad:[
+  ["예언은 이루어졌다. {A}의 손에 {B}의 피가 묻어 있다.",-10,-18,-18],
+  ["{B은} {A을} 잊었다. 그것이 저주를 푸는 대가였다.",-8,-15,-2],
+  ["{P}은 무너졌고, 두 사람은 적이 되어 다시 만났다.",-12,-12,-12]]
+},
+
+noir:{name:"느와르·스릴러",rate:"15",pc:["#e8604f","#1a0d0c"],
+ places:["부둣가 컨테이너 야적장","비 내리는 지하 주차장","문 닫은 재즈바","경찰서 취조실","폐건물 7층","새벽의 세탁소 뒷골목","카지노 VIP룸"],
+ things:["피 묻은 라이터","출처 없는 장부","녹음 파일","위조 여권","반쯤 탄 사진","열쇠 하나"],
+ extras:["조직의 보스","내사과 형사","정체불명의 의뢰인","배신자"],
+ titles:["거짓 이름의 {B}","비는 그치지 않는다","{A}의 라이터","마지막 한 발","부둣가의 {B}","새벽 4시의 공범"],
+ open:[
+  ["{P}. {A은} 형사, {B은} 그날의 유일한 목격자였다.",0,-2,-6],
+  ["{B}의 총구가 {A}의 이마를 겨눴다. 비가 그치지 않는 밤이었다.",-2,-8,-4],
+  ["{A은} 의뢰를 받았다. 타깃의 사진 속 인물은 {B}의 얼굴을 하고 있었다.",0,-4,0],
+  ["{P}에서 {A와} {B이} 같은 테이블에 앉았다. 둘 다 서로를 미행하던 중이었다.",2,-3,-3],
+  ["담뱃불을 빌려준 손에 문신이 있었다. {A은} {B}의 손목을 기억해 두었다.",4,0,2],
+  ["두 사람이 처음 만났다. 서로 거짓 이름을 댔다.",3,0,0],
+  ["{X이} 두 사람을 한 팀으로 묶었다. 서로를 감시하라는 뜻이었다.",0,-4,-4]],
+ build:[
+  ["{B은} {A}의 상처를 아무 말 없이 꿰맸다. 솜씨가 너무 능숙했다.",7,0,2],
+  ["{P}에서 두 사람은 위스키를 나눠 마셨다. 잔이 비는 속도가 같았다.",6,3,3],
+  ["{A은} {B}의 거짓말을 알아챘지만 모른 척했다.",5,-2,2],
+  ["{T}에 적힌 이름들. 그중 하나에 {B}의 필체로 줄이 그어져 있었다.",2,-4,-2],
+  ["{B은} {A}에게 등을 보이고 잠들었다. 이 바닥에서 그건 신뢰의 표시다.",9,3,4],
+  ["{A은} {B}의 신원 조회를 했다. 결과는 ‘기록 없음’.",3,-3,0],
+  ["둘은 {X}의 눈을 피해 새벽 국밥집에서 만난다. 이제 습관이 되었다.",7,4,4],
+  ["{B은} {A}의 라이터를 돌려주지 않았다. 대신 매번 불을 붙여준다.",7,4,4],
+  ["{A}의 집 앞에 누군가 꽃 한 송이를 두고 갔다. 쪽지는 없었다.",5,3,2]],
+ rise:[
+  ["총성이 울렸다. {B은} 반사적으로 {A}의 앞을 막아섰다.",12,-4,-2],
+  ["“이 일 끝나면 같이 떠날까.” 농담처럼 {B이} 말했다. 눈은 웃고 있지 않았다.",9,4,2],
+  ["감정이 고조된다. 이 바닥에서 이런 감정은 약점이 된다.",6,-2,-2],
+  ["취조실 유리창 너머, {A와} {B}의 눈이 마주쳤다. 둘만 아는 신호였다.",8,3,3],
+  ["{A은} 위조 여권을 두 개 준비했다. 하나는 {B}의 것이었다.",10,4,4],
+  ["{P}, 빗속에서 두 사람은 오래 서 있었다. 누구도 먼저 우산을 펴지 않았다.",8,0,0],
+  ["{B은} 처음으로 진짜 이름을 말했다.",11,4,6]],
+ trouble:[
+  ["문제가 생겼다. {B이} {X}의 스파이라는 증거가 나왔다.",-15,-14,-8],
+  ["{A}의 파트너가 살해당했다. 현장에 {B}의 {T이} 떨어져 있었다.",-15,-15,-10],
+  ["{X이} {A}에게 명령했다. “{B}, 처리해.”",-8,-15,-6],
+  ["{B은} {A을} 경찰에 넘기라는 제안을 받았다. 대가는 자유였다.",-6,-6,-14],
+  ["{P}에서 함정이 터졌다. 누군가 두 사람의 동선을 팔았다.",-10,-12,-12],
+  ["{A은} {B}의 휴대폰에서 자신을 찍은 사진 수십 장을 발견했다.",-12,-14,-4],
+  ["녹음 파일이 유출되었다. 목소리의 주인은 {A}의 것이었다.",-12,-10,-12],
+  ["{B이} 사라졌다. 남은 건 반쯤 탄 사진 한 장.",-5,-12,-6]],
+ climax:[
+  ["{A와} {B은} 서로에게 총구를 겨눴다. 누구도 방아쇠를 당기지 않았다.",6,-10,-10],
+  ["{B은} {X}를 향해 총을 쐈다. {A}를 위해서.".replace("{X}를","{X을}").replace("{A}를","{A을}"),13,4,-4],
+  ["{A은} 배지를 내려놓았다. 그리고 {B}의 손을 잡고 뒷문으로 달렸다.",13,6,6],
+  ["총성이 한 번. {B이} 쓰러졌다.",-4,-18,-15],
+  ["{P}에서 두 사람은 모든 증거를 불태웠다.",10,4,4],
+  ["{A은} {B}의 죄를 대신 뒤집어썼다.",12,-8,-2]],
+ resolve:[
+  ["새벽, 두 사람은 이름 없는 항구 도시로 가는 배에 올랐다.",11,8,8],
+  ["{B은} 살았다. 병실 문 앞에서 {A은} 담배를 끊기로 했다.",10,6,4],
+  ["{X은} 체포되었다. 기자회견장 뒤편에서 {A와} {B은} 짧게 눈인사를 나눴다.",8,6,6],
+  ["두 사람은 진짜 이름으로 서로를 불렀다. 처음이었다.",11,8,8],
+  ["{A은} 7년을 기다렸다. 출소하는 날, {B이} 문 앞에 서 있었다.",12,8,8],
+  ["{B은} {A}의 라이터를 마침내 돌려주었다. “이제 필요 없어. 내가 옆에 있을 거니까.”",11,8,8],
+  ["{A은} 모든 걸 알면서도 {B을} 놓아주었다.",-4,-8,4]],
+ good:[
+  ["남쪽 바닷가 작은 바. 두 사람은 같은 잔을 들고 노을을 본다.",8,9,9],
+  ["더 이상 거짓 이름은 필요 없다. 두 사람은 서로를 확인했다.",8,10,10],
+  ["비가 그쳤다. 이 영화에서 처음으로.",7,9,9],
+  ["“이번엔 진짜야.” {B}의 말에 {A이} 처음으로 크게 웃었다.",8,9,9]],
+ openE:[
+  ["{A}의 책상 위에 발신인 없는 엽서가 도착한다. 낯익은 필체다.",2,3,0],
+  ["{B}의 행방은 아무도 모른다. {A은} 오늘도 {P}의 문을 연다.",0,-3,0],
+  ["엔딩 크레딧 직후, 한 발의 총성. 누가 쐈는지는 나오지 않는다.",0,-2,-2]],
+ bad:[
+  ["{A은} 끝내 방아쇠를 당겼다. 빗소리가 모든 걸 덮었다.",-15,-18,-18],
+  ["두 사람은 서로를 팔았다. 누가 먼저였는지는 중요하지 않다.",-14,-12,-12],
+  ["{B}의 장례식. {A은} 멀리서 담배 한 개비를 태우고 돌아섰다.",-8,-18,-15]]
+},
+
+school:{name:"학원물",rate:"all",pc:["#7fd6ff","#183a4a"],
+ places:["방과 후 음악실","비 오는 날의 체육창고","도서관 맨 끝 서가","옥상 계단참","수학여행 버스 뒷자리","축제 준비 중인 교실","학교 앞 분식집"],
+ things:["빌린 체육복","접힌 쪽지","바나나우유","교환일기","졸업앨범","이어폰"],
+ extras:["담임 선생님","학생회장","전학생","반 친구들"],
+ titles:["{B}의 교환일기","방과 후, {A}","바나나우유와 {B}","우리 반 {A}","벚꽃 교문","옥상 계단참에서"],
+ open:[
+  ["전학 첫날, {B}의 짝이 정해졌다. 하루 종일 엎드려 자는 애, {A}.",3,0,-2],
+  ["{P}. {A이} 피아노를 치고 있었다. 문틈으로 {B이} 그걸 보았다.",6,2,5],
+  ["{A은} 지각을 피해 담을 넘다가 {B}의 위로 떨어졌다.",2,-2,-4],
+  ["{B은} 시험지를 걷다 {A}의 답안지 뒷면에 그려진 낙서를 봤다. 자기 얼굴이었다.",5,0,4],
+  ["{X}의 지시로 {A와} {B이} 같은 조가 되었다. 둘 다 표정이 썩었다.",-1,-3,-3],
+  ["두 사람이 처음 만났다. 복도 끝에서 눈이 마주쳤다.",5,3,3],
+  ["{A은} {B}에게 {T을} 빌렸다. 돌려주는 걸 일부러 미뤘다.",5,4,1]],
+ build:[
+  ["{B은} 매일 {A}의 책상에 바나나우유를 올려놓는다. 이름은 안 쓴다.",7,5,4],
+  ["둘은 {P}에서 몰래 수업을 빠졌다. 잡히지 않았다.",7,6,6],
+  ["{A은} {B}의 수학 숙제를 봐주다가 자기 문제를 다 틀렸다.",5,3,4],
+  ["{X이} 묻는다. “너네 둘이 사귀어?” 둘 다 너무 크게 아니라고 했다.",6,3,3],
+  ["교환일기 세 번째 장, {B}의 글씨가 조금 떨려 있었다.",7,4,5],
+  ["체육대회 계주. {A}에게 바통을 넘기던 {B}의 손이 닿았다.",7,5,5],
+  ["{A은} {B}의 이어폰 한쪽을 뺏어 꼈다. 노래 취향이 같았다.",7,6,6],
+  ["둘은 {P}에서 비를 피했다. 우산은 하나였다.",8,5,5],
+  ["{B은} {A}의 반 앞을 괜히 세 번 지나갔다.",4,2,4]],
+ rise:[
+  ["축제 날, {A}의 무대가 끝나자 {B은} 누구보다 크게 박수를 쳤다.",10,8,7],
+  ["“너 좋아하는 사람 있어?” {B}의 질문에 {A}의 귀가 빨개졌다.",8,4,4],
+  ["감정이 고조된다. 종이 울려도 아무도 일어나지 않았다.",6,3,3],
+  ["{P}, 노을 아래에서 {B은} {A}의 이름을 칠판에 적었다가 지웠다.",8,2,7],
+  ["수학여행 밤, 둘은 몰래 빠져나와 별을 봤다.",10,8,8],
+  ["{A은} {B}의 운동화 끈을 묶어 주었다. 주변이 갑자기 조용해졌다.",9,6,7],
+  ["{B은} {A}의 체육복을 입고 하루를 보냈다. 소매가 길었다.",8,5,7]],
+ trouble:[
+  ["문제가 생겼다. 교환일기가 반 단톡방에 퍼졌다.",-10,-14,-14],
+  ["{B은} 다음 달 전학을 간다. {A}에게는 아직 말하지 못했다.",-6,-4,-12],
+  ["{X이} {A}에게 고백했다. {B은} 그 장면을 계단 위에서 봤다.",-12,-4,-14],
+  ["{A}의 성적이 떨어졌다. 부모님은 {B을} 이유로 지목했다.",-6,-12,-6],
+  ["둘은 사소한 오해로 싸웠다. 일주일째 말을 하지 않는다.",-12,-10,-10],
+  ["{B은} {A}의 진로 희망서에서 다른 도시의 대학 이름을 봤다.",-8,-4,-10],
+  ["{A은} 축제 무대 직전에 목소리가 나오지 않았다.",2,-14,-6],
+  ["누군가 {P}에 둘에 대한 이상한 소문을 적어 놓았다.",-8,-12,-12]],
+ climax:[
+  ["{A은} 방송실 마이크를 켰다. “{B}, 할 말 있어.”",14,6,10],
+  ["{B은} 전학 가는 날 아침, {A}의 신발장에 편지를 넣었다.",8,-2,-4],
+  ["졸업식 날, 두 사람은 {P}에서 마주 섰다. 이번엔 도망치지 않았다.",11,6,6],
+  ["{A은} 출발하는 버스를 따라 끝까지 뛰었다.",10,2,6],
+  ["{B은} 단톡방에 적었다. “응, 나 {A} 좋아해. 그래서 뭐.”",15,10,8],
+  ["{A은} 끝내 고개를 돌렸다. 친구로 남는 게 낫다고 생각했다.",-12,-12,-12]],
+ resolve:[
+  ["둘은 화해의 의미로 분식집 떡볶이를 반씩 나눠 먹었다.",9,7,7],
+  ["{B은} {A}의 졸업앨범 맨 뒷장에 긴 글을 남겼다.",9,6,6],
+  ["두 사람은 같은 대학을 목표로 같은 독서실에 등록했다.",10,8,8],
+  ["{A은} {B}의 손을 잡고 복도 한가운데를 걸었다. 다들 쳐다봐도 상관없었다.",12,9,9],
+  ["{X이} 두 사람의 자리를 슬쩍 짝으로 바꿔주었다.",8,6,6],
+  ["교환일기의 마지막 장. 두 사람은 같은 날 같은 문장을 적었다.",11,8,8],
+  ["{B은} 결국 전학을 갔다. 주말마다 기차표 두 장이 오갔다.",4,0,2]],
+ good:[
+  ["벚꽃이 흩날리는 교문 앞. 두 사람은 서로의 마음을 확인했다.",8,10,10],
+  ["10년 후 동창회. {A와} {B}의 왼손 약지에 같은 반지가 있다.",8,9,9],
+  ["“졸업해도 계속 옆에 있어.” “당연하지.”",7,9,9],
+  ["마지막 장면, {P}의 칠판에 두 사람의 이름이 나란히 적혀 있다.",7,8,8]],
+ openE:[
+  ["졸업 후 연락이 끊겼다. 그런데 오늘, 두 사람이 같은 지하철 칸에 탔다.",2,2,2],
+  ["교환일기의 마지막 장은 비어 있다. 누가 먼저 쓸지는 아직 모른다.",0,0,0],
+  ["{A은} 보내지 못한 쪽지를 아직 필통에 넣고 다닌다.",0,-2,0]],
+ bad:[
+  ["두 사람은 그렇게 멀어졌다. 졸업앨범 단체 사진에서만 나란히 서 있다.",-8,-12,-12],
+  ["{B}의 자리는 이제 비어 있다. {A은} 그 책상에 엎드려 잠든 척한다.",-6,-12,-6],
+  ["끝내 고백하지 못했다. 그 봄은 그렇게 지나갔다.",-5,-10,-10]]
+}
+};
+
+/* 장르 공통 — 어느 장르에든 섞여 나오는 지문 */
+const COMMON = {
+ build:[
+  ["{A은} 요즘 자꾸 {B을} 떠올린다. 이유는 모른다.",5,4,0],
+  ["두 사람은 연락처를 교환했다. 저장된 이름은 둘 다 비밀이다.",6,4,4],
+  ["{B은} {A}의 웃음소리가 의외로 크다는 걸 알게 되었다.",5,3,4],
+  ["같은 장면, 같은 타이밍에 두 사람이 동시에 웃었다.",6,5,5],
+  ["{A은} {B}에게 하려던 말을 세 번 삼켰다.",3,-1,0],
+  ["둘 사이에 묘한 침묵이 흐른다. 불편하지는 않다.",4,2,2]],
+ rise:[
+  ["{A와} {B}의 시선이 3초 넘게 얽혔다.",7,5,5],
+  ["“넌 왜 자꾸 신경 쓰이게 해?” {B이} 투덜거렸다.",7,3,5],
+  ["{A은} {B}의 어깨에 기대 잠들었다. {B은} 끝까지 움직이지 않았다.",9,5,7],
+  ["심장 소리가 너무 커서 들킬 것 같았다.",7,5,5]],
+ trouble:[
+  ["{A은} {B}에게서 처음으로 차가운 목소리를 들었다.",-9,-10,-4],
+  ["오해는 한 문장에서 시작됐다. 그리고 걷잡을 수 없이 커졌다.",-10,-8,-8],
+  ["{B은} 아무 설명 없이 연락을 끊었다.",-11,-12,-6],
+  ["두 사람 사이에 넘을 수 없는 선이 그어졌다.",-8,-8,-8]],
+ climax:[
+  ["{A은} 도망치지 않고 {B}의 눈을 똑바로 봤다.",9,4,4],
+  ["“이번엔 내가 갈게.” {B이} 먼저 걸음을 옮겼다.",11,6,6]],
+ resolve:[
+  ["두 사람은 아주 오래, 아무 말 없이 서로를 안고 있었다.",10,8,8],
+  ["{A이} 웃었다. {B}도 따라 웃었다. 그걸로 충분했다.",8,8,8]]
+};
+
+/* 관계 설정 — 처음 만남이 아니면 오프닝이 여기서 나옴 */
+const REL = {
+ first:{name:"처음 만남",start:30},
+ friends:{name:"오랜 친구",start:46,lines:[
+  ["{A와} {B은} 열 살 때부터 친구였다. 오늘도 {P}에서 습관처럼 만났다.",4,3,3],
+  ["{B은} {A}의 연락처를 아직도 ‘바보’로 저장해 두었다.",4,2,4],
+  ["오랜 친구인 두 사람. 서로 모르는 게 없다고 믿었다. 오늘 전까지는.",2,0,0],
+  ["{A은} {B}의 커피 취향을 묻지도 않고 주문했다. 틀린 적이 없다.",5,3,4]]},
+ rivals:{name:"앙숙",start:20,lines:[
+  ["{A와} {B은} 만나기만 하면 싸운다. 오늘도 {P}에서 신경전이 시작되었다.",-3,-5,-5],
+  ["“또 너야?” 두 사람의 대사가 정확히 겹쳤다.",-1,-4,-4],
+  ["{B은} {A}에게 지는 것만은 죽어도 싫다.",-2,-2,-6],
+  ["{P}. 남은 자리는 하필 {A}의 옆자리뿐이었다. {B은} 이를 갈았다.",-2,-3,-6]]},
+ exes:{name:"전 연인",start:36,lines:[
+  ["헤어진 지 2년. {A와} {B은} {P}에서 다시 마주쳤다.",3,-6,-4],
+  ["{B}의 목소리를 듣자마자 {A은} 그 시절로 돌아간 것 같았다.",5,-2,2],
+  ["“잘 지냈어?” 어색한 인사. 둘 다 잘 지내지 못했다.",3,-5,-5],
+  ["{A은} {B이} 줬던 {T을} 아직 버리지 못했다.",5,-3,0]]}
+};
+
+const LENS = {short:{name:"단편",n:12},feature:{name:"장편",n:18},cut:{name:"감독판",n:27}};
+const ENDS = {good:"해피 엔딩",openE:"열린 결말",bad:"새드 엔딩"};
+const REVIEWS = {
+ good:["팝콘 다 먹기도 전에 울었다","이 둘 결혼식 축가는 내가 부른다","엔딩 크레딧까지 박수 쳤음","n차 관람 확정. 굿즈 어디서 팔아요"],
+ openE:["속편 안 나오면 감독 집 앞에서 시위함","그래서 둘이 만나는 거야 마는 거야","마지막 3초 해석 글 찾으러 감","이 결말로 연성 100편 나온다"],
+ bad:["극장 화장실에서 울고 나옴","감독님 저한테 왜 그러세요","다시 볼 자신이 없다… 근데 또 볼 듯","IF 외전 내놔"]
+};
+const RATE_LABEL = {all:"전체",12:"12",15:"15"};
+const ACT_NAME = {1:"1막 · 만남",2:"2막 · 흔들림",3:"3막 · 결말"};
+
+/* ---------- 조사 처리 ---------- */
+const JOSA={이:["이","가"],가:["이","가"],은:["은","는"],는:["은","는"],을:["을","를"],를:["을","를"],와:["과","와"],과:["과","와"],아:["아","야"],야:["아","야"]};
+function bat(w){
+  w=String(w).trim().replace(/[’'”"」)\]]+$/,"");
+  if(!w) return {has:false,r:false};
+  const c=w.charCodeAt(w.length-1);
+  if(c>=0xAC00&&c<=0xD7A3){const j=(c-0xAC00)%28;return {has:j!==0,r:j===8};}
+  const ch=w.slice(-1);
+  if(/[0-9]/.test(ch)) return {has:"0136783".includes(ch),r:"178".includes(ch)};
+  if(/[a-zA-Z]/.test(ch)) return {has:!/[aeiouyAEIOUY]/.test(ch),r:/[lL]/.test(ch)};
+  return {has:false,r:false};
+}
+function attach(w,j){
+  if(!j) return w;
+  const b=bat(w);
+  if(j==="로"||j==="으로") return w+((b.has&&!b.r)?"으로":"로");
+  return w+(b.has?JOSA[j][0]:JOSA[j][1]);
+}
+function fill(t,ctx){
+  return t.replace(/\{(A|B|P|T|X)(이|가|은|는|을|를|와|과|으로|로|아|야)?\}/g,(m,k,j)=>{
+    let v=ctx[k]; if(k==="X") v=fill(v,ctx); return attach(v,j);
+  });
+}
+
+/* ---------- 유틸 ---------- */
+const $=s=>document.querySelector(s);
+const rand=(a,b)=>a+Math.random()*(b-a);
+const rint=(a,b)=>Math.floor(rand(a,b+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function bagDraw(bags,key,pool){
+  if(!bags[key]||!bags[key].length) bags[key]=shuffle(pool);
+  return bags[key].pop();
+}
+function tc(min){const h=Math.floor(min/60),m=Math.floor(min%60),s=Math.floor((min*60)%60);return [h,m,s].map(v=>String(v).padStart(2,"0")).join(":");}
+
+/* ---------- 각본 생성 ---------- */
+function plan(n,rel){
+  const a1=Math.max(3,Math.round(n*0.26)), a3=Math.max(4,Math.round(n*0.3)), a2=n-a1-a3;
+  const out=[{kind:rel==="first"?"open":"rel",act:1}];
+  for(let i=1;i<a1;i++) out.push({kind:(i%4===3)?"rise":"build",act:1});
+  const cyc=["build","rise","trouble"];
+  for(let i=0;i<a2;i++) out.push({kind:i===a2-1?"trouble":cyc[i%3],act:2});
+  out.push({kind:"climax",act:3});
+  if(a3>=6) out.push({kind:"climax",act:3});
+  while(out.length<n-1) out.push({kind:"resolve",act:3});
+  out.push({kind:"ending",act:3});
+  return out;
+}
+const TENSION={rel:15,open:15,build:24,rise:44,trouble:76,climax:93,resolve:38,ending:18};
+
+function emotion(m,d){
+  if(d>=8) return m>30?"설렘":"안도";
+  if(d<=-10) return m<-30?"절망":"충격";
+  if(m>=60) return "행복"; if(m>=30) return "들뜸"; if(m>=5) return "평온";
+  if(m>-20) return "복잡"; if(m>-50) return "불안"; return "무너짐";
+}
+function affWord(a){
+  if(a>=90) return "운명"; if(a>=70) return "사랑"; if(a>=50) return "호감";
+  if(a>=30) return "관심"; if(a>=15) return "어색함"; return "냉랭";
+}
+function tenWord(t){ if(t>=85) return "절정"; if(t>=65) return "위기"; if(t>=40) return "고조"; return "잔잔"; }
+
+function makeFilm(cfg){
+  const beats=plan(LENS[cfg.len].n,cfg.rel);
+  const fixed={};
+  cfg.genres.forEach(g=>{fixed[g]={T:pick(G[g].things),X:pick(G[g].extras)};});
+  const g0=cfg.genres[0];
+  const baseCtx=g=>({A:cfg.A,B:cfg.B,P:pick(G[g].places),T:fixed[g].T,X:fixed[g].X});
+  const bags={};
+  let aff=clamp(REL[cfg.rel].start+rint(-6,6),0,100), mA=rint(-5,20), mB=rint(-5,20);
+  const bias=rand(-0.3,0.3), lenK=18/beats.length;
+  const scenes=[]; let endKey="openE";
+  const runtime=rint(96,132);
+  beats.forEach((b,i)=>{
+    const g=pick(cfg.genres);
+    let line;
+    if(b.kind==="rel") line=bagDraw(bags,"rel",REL[cfg.rel].lines);
+    else if(b.kind==="ending"){
+      endKey=aff>=72?"good":aff>=48?"openE":"bad";
+      line=bagDraw(bags,g+endKey,G[g][endKey]);
+    } else if(COMMON[b.kind]&&Math.random()<0.2) line=bagDraw(bags,"c"+b.kind,COMMON[b.kind]);
+    else line=bagDraw(bags,g+b.kind,G[g][b.kind]);
+    const kp=rand(0.5,1.0), kn=rand(0.9,1.6);
+    const sc=v=>Math.round((v>0?v*kp*(1+bias):v*kn*(1-bias))*lenK);
+    const dAff=sc(line[1]), dA=sc(line[2]), dB=sc(line[3]);
+    const pa=aff, pA=mA, pB=mB;
+    aff=clamp(aff+dAff,0,100); mA=clamp(mA+dA,-100,100); mB=clamp(mB+dB,-100,100);
+    const ten=clamp(TENSION[b.kind]+rint(-8,8),0,100);
+    scenes.push({
+      i, act:b.act, kind:b.kind, genre:g,
+      text:fill(line[0],baseCtx(g)),
+      aff, mA, mB, ten,
+      dAff:aff-pa, dA:mA-pA, dB:mB-pB,
+      eA:emotion(mA,mA-pA), eB:emotion(mB,mB-pB),
+      tc:tc(runtime*(i+0.5)/beats.length)
+    });
+  });
+  const ratesNum=cfg.genres.map(g=>G[g].rate==="all"?0:+G[g].rate);
+  const rmax=Math.max(...ratesNum);
+  const affs=scenes.map(s=>s.aff);
+  const swing=Math.max(...affs)-Math.min(...affs);
+  const stars=clamp(Math.round((2.6+swing/45+(endKey==="bad"?0.7:endKey==="good"?0.5:0.4)+rand(-0.3,0.4))*2)/2,1.5,5);
+  return {
+    cfg, scenes, endKey, runtime, stars,
+    rate: rmax===0?"all":String(rmax),
+    title: fill(pick(G[g0].titles),{A:cfg.A,B:cfg.B,P:pick(G[g0].places),T:fixed[g0].T,X:fixed[g0].X}),
+    genreName: cfg.genres.map(g=>G[g].name).join(" × "),
+    pc: G[g0].pc, review: pick(REVIEWS[endKey])
+  };
+}
+
+/* ---------- 설정 화면 ---------- */
+const state={rel:"first",genres:["romance"],len:"feature"};
+function opts(host,items,isOn,onClick){
+  host.innerHTML="";
+  items.forEach(([key,label])=>{
+    const b=document.createElement("button");
+    b.type="button"; b.className="opt"; b.setAttribute("aria-pressed",isOn(key)?"true":"false");
+    b.innerHTML=label;
+    b.onclick=()=>{onClick(key);renderSetup();};
+    host.appendChild(b);
+  });
+}
+function hash(str){let h=2166136261;for(const c of str){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;}
+function drawBarcode(){
+  const A=$("#nameA").value.trim(), B=$("#nameB").value.trim();
+  barcodeInto($("#barcode"),A+"|"+B+"|"+state.genres.join()+state.rel+state.len);
+  const code=String(hash(A+B)).padStart(10,"0").slice(0,10);
+  $("#tkCode").textContent=code.replace(/(\d{4})(\d{3})(\d{3})/,"$1 $2 $3");
+}
+function barcodeInto(host,seed){
+  let h=hash(seed)||1;
+  const rnd=()=>{h^=h<<13;h^=h>>>17;h^=h<<5;h>>>=0;return h/4294967296;};
+  const W=host.clientWidth||380;
+  let html="",used=0;
+  while(used<W-4){const bar=1+Math.floor(rnd()*3.2),gap=1+Math.floor(rnd()*3);if(used+bar>W)break;html+=`<i style="width:${bar}px"></i><b style="width:${gap}px"></b>`;used+=bar+gap;}
+  host.innerHTML=html;
+}
+function renderSetup(){
+  opts($("#rel"),Object.entries(REL).map(([k,v])=>[k,v.name]),k=>state.rel===k,k=>state.rel=k);
+  const gh=$("#genres"); gh.innerHTML="";
+  Object.entries(G).forEach(([k,v])=>{
+    const on=state.genres.includes(k);
+    const b=document.createElement("button");
+    b.type="button"; b.className="item"; b.setAttribute("aria-pressed",on?"true":"false");
+    b.innerHTML=`<span class="box"></span><span class="nm">${esc(v.name)}</span><span class="lead"></span><span class="rt">${RATE_LABEL[v.rate]}</span><span class="qty">×${on?1:0}</span>`;
+    b.onclick=()=>{
+      const i=state.genres.indexOf(k);
+      if(i>=0){ if(state.genres.length>1) state.genres.splice(i,1); }
+      else { state.genres.push(k); if(state.genres.length>2) state.genres.shift(); }
+      renderSetup();
+    };
+    gh.appendChild(b);
+  });
+  opts($("#len"),Object.entries(LENS).map(([k,v])=>[k,`${v.name}<small>${v.n} SCENES</small>`]),k=>state.len===k,k=>state.len=k);
+  const n=LENS[state.len].n, sec=n*3;
+  $("#tkScenes").textContent=n+" SCENES";
+  $("#runHint").textContent=`약 ${Math.floor(sec/60)}분 ${String(sec%60).padStart(2,"0")}초`;
+  $("#tkGenre").textContent=state.genres.map(g=>G[g].name).join(" × ");
+  const A=$("#nameA").value.trim()||"—", B=$("#nameB").value.trim()||"—";
+  $("#tkCast").textContent=A+" & "+B;
+  const r=Math.max(...state.genres.map(g=>G[g].rate==="all"?0:+G[g].rate));
+  $("#tkRate").textContent=r===0?"ALL":r+"+";
+  drawBarcode();
+}
+(function initStub(){
+  const d=new Date();
+  $("#hall").textContent=String(rint(1,9)).padStart(2,"0");
+  $("#seat").textContent=String.fromCharCode(64+rint(5,12))+rint(10,14)+"·"+rint(15,16);
+  $("#today").textContent=`${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
+  $("#tkTime").textContent=`${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+  $("#tkNo").textContent="NO."+String(rint(1,9999)).padStart(4,"0");
+  try{const s=JSON.parse(localStorage.getItem("ds-cast")||"null"); if(s&&s.A){$("#nameA").value=s.A;$("#nameB").value=s.B;}}catch(e){}
+  ["#nameA","#nameB"].forEach(id=>$(id).addEventListener("input",()=>{
+    $("#tkCast").textContent=($("#nameA").value.trim()||"—")+" & "+($("#nameB").value.trim()||"—");drawBarcode();}));
+  renderSetup();
+})();
+
+/* ---------- 상영 ---------- */
+let film=null, timer=null, typer=null, idx=0, speed=1, running=false;
+function show(id){["setup","theater","results"].forEach(s=>$("#"+s).hidden=(s!==id));window.scrollTo({top:0});}
+
+$("#form").addEventListener("submit",e=>{
+  e.preventDefault();
+  const A=$("#nameA").value.trim(), B=$("#nameB").value.trim();
+  if(!A||!B){$("#err").textContent="두 주연의 이름을 모두 적어 주세요.";return;}
+  if(A===B){$("#err").textContent="두 주연의 이름이 같아요. 다른 이름을 넣어 주세요.";return;}
+  $("#err").textContent="";
+  try{localStorage.setItem("ds-cast",JSON.stringify({A,B}));}catch(e){}
+  start(makeFilm({A,B,genres:state.genres.slice(),rel:state.rel,len:state.len}));
+});
+
+function start(f){
+  film=f; idx=0; running=true;
+  show("theater");
+  $("#tTitle").textContent="〈"+f.title+"〉";
+  $("#tGenre").textContent=f.genreName+" · "+f.cfg.A+" × "+f.cfg.B;
+  const r=$("#tRate"); r.className="rate "+(f.rate==="all"?"rall":"r"+f.rate); r.textContent=f.rate==="all"?"ALL":f.rate+"+";
+  $("#kA").textContent=f.cfg.A; $("#kB").textContent=f.cfg.B;
+  $("#past").innerHTML=""; $("#sub").textContent=""; $("#theend").hidden=true;
+  $("#reel").style.width="0"; $("#tScene").textContent="S#00"; $("#tAct").textContent=ACT_NAME[1];
+  setMeters({aff:REL[f.cfg.rel].start,mA:0,mB:0,ten:10,eA:"-",eB:"-"},true);
+  countdown(()=>tick());
+}
+function countdown(done){
+  const c=$("#count"); c.hidden=false;
+  const ring=`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="none" style="stroke:var(--dim)" stroke-width="1"/><circle cx="50" cy="50" r="38" fill="none" style="stroke:var(--dim)" stroke-width="1"/><line x1="50" y1="0" x2="50" y2="100" style="stroke:var(--dim)" stroke-width="1"/><line x1="0" y1="50" x2="100" y2="50" style="stroke:var(--dim)" stroke-width="1"/></svg>`;
+  let n=3;
+  const step=()=>{
+    if(!running) return;
+    if(n===0){c.hidden=true;done();return;}
+    c.innerHTML=ring+"<span>"+n+"</span>"; n--;
+    timer=setTimeout(step,reduced?300:750);
+  };
+  step();
+}
+function setDelta(el,v){
+  el.classList.remove("show","up","dn");
+  if(!v) {el.textContent="";return;}
+  void el.offsetWidth;
+  el.textContent=(v>0?"+":"")+v; el.classList.add("show",v>0?"up":"dn");
+}
+function moodBar(el,m){
+  if(m>=0){el.style.left="50%";el.style.width=(m/2)+"%";}
+  else{el.style.left=(50+m/2)+"%";el.style.width=(-m/2)+"%";}
+}
+function setMeters(s,silent){
+  $("#vAff").textContent=s.aff; $("#bAff").style.width=s.aff+"%"; $("#eAff").textContent=affWord(s.aff);
+  $("#vA").textContent=(s.mA>0?"+":"")+s.mA; moodBar($("#bA"),s.mA); $("#eA").textContent=s.eA;
+  $("#vB").textContent=(s.mB>0?"+":"")+s.mB; moodBar($("#bB"),s.mB); $("#eB").textContent=s.eB;
+  $("#vT").textContent=s.ten; $("#bT").style.width=s.ten+"%"; $("#eT").textContent=tenWord(s.ten);
+  if(!silent){setDelta($("#dAff"),s.dAff);setDelta($("#dA"),s.dA);setDelta($("#dB"),s.dB);}
+}
+function typeTo(el,text){
+  clearInterval(typer);
+  if(reduced){el.textContent=text;return;}
+  let i=0; el.textContent="";
+  const stepMs=speed===2?14:26;
+  typer=setInterval(()=>{i+=2;el.textContent=text.slice(0,i);if(i>=text.length)clearInterval(typer);},stepMs);
+}
+function tick(){
+  if(!running) return;
+  if(idx>=film.scenes.length){finish();return;}
+  const s=film.scenes[idx];
+  const prev=$("#sub").textContent;
+  if(prev){
+    const p=document.createElement("p"); p.textContent=film.scenes[idx-1].text;
+    const past=$("#past"); past.appendChild(p);
+    while(past.children.length>2) past.removeChild(past.firstChild);
+  }
+  typeTo($("#sub"),s.text);
+  $("#tc").textContent=s.tc;
+  $("#tScene").textContent="S#"+String(idx+1).padStart(2,"0")+" / "+film.scenes.length;
+  $("#tAct").textContent=ACT_NAME[s.act];
+  $("#reelNo").textContent="REEL "+s.act;
+  $("#reel").style.width=((idx+1)/film.scenes.length*100)+"%";
+  setMeters(s);
+  idx++;
+  timer=setTimeout(tick,speed===2?1500:3000);
+}
+function finish(){
+  clearTimeout(timer); clearInterval(typer);
+  $("#theend").hidden=false;
+  timer=setTimeout(()=>{running=false;renderResults();},reduced?400:2200);
+}
+$("#spd").onclick=()=>{speed=speed===1?2:1;$("#spd").setAttribute("aria-pressed",speed===2?"true":"false");$("#tSpd").textContent=speed+"×";};
+$("#skip").onclick=()=>{if(!running)return;clearTimeout(timer);clearInterval(typer);running=false;renderResults();};
+$("#stop").onclick=()=>{running=false;clearTimeout(timer);clearInterval(typer);show("setup");};
+
+/* ---------- 결과 ---------- */
+let sel=null;
+const charts=[];
+function actStarts(){const out=[];film.scenes.forEach((s,i)=>{if(i>0&&s.act!==film.scenes[i-1].act)out.push(i);});return out;}
+
+function chart(host,opt){
+  const n=film.scenes.length;
+  const W=Math.max(280,Math.floor(host.clientWidth||640)), H=opt.h, pl=36, pr=10, pt=22, pb=24;
+  const iw=W-pl-pr, ih=H-pt-pb;
+  const x=i=>pl+(n<2?0:i*iw/(n-1)), y=v=>pt+(opt.max-v)/(opt.max-opt.min)*ih;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(opt.label)}">`;
+  opt.grid.forEach(g=>{s+=`<line class="g${g===0&&opt.min<0?" zero":""}" x1="${pl}" x2="${W-pr}" y1="${y(g)}" y2="${y(g)}"/><text class="ax" x="${pl-6}" y="${y(g)+3.5}" text-anchor="end">${g}</text>`;});
+  const starts=actStarts();
+  [0,...starts].forEach((st,k)=>{
+    if(st>0){const xx=(x(st)+x(st-1))/2; s+=`<line class="actline" x1="${xx}" x2="${xx}" y1="${pt-4}" y2="${H-pb}"/>`;}
+    const lx=st>0?(x(st)+x(st-1))/2+5:pl+2;
+    s+=`<text class="actl" x="${lx}" y="${pt-8}">${k+1}막</text>`;
+  });
+  opt.series.forEach(se=>{
+    const pts=se.vals.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`);
+    if(se.area) s+=`<path d="M${x(0)},${y(opt.min)} L${pts.join(" L")} L${x(n-1)},${y(opt.min)} Z" style="fill:${se.color};fill-opacity:.15"/>`;
+    s+=`<polyline points="${pts.join(" ")}" style="fill:none;stroke:${se.color}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"${se.dash?' stroke-dasharray="5 4"':""}/>`;
+    if(se.dots) se.vals.forEach((v,i)=>{
+      const d=se.deltas?se.deltas[i]:0;
+      const col=d>0?"var(--good)":d<0?"var(--bad)":se.color;
+      s+=`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3.4" style="fill:var(--paper);stroke:${col}" stroke-width="2"/>`;
+    });
+  });
+  const step=n>20?3:2;
+  for(let i=0;i<n;i++) if(i%step===0||i===n-1) s+=`<text class="ax" x="${x(i)}" y="${H-6}" text-anchor="middle">${i+1}</text>`;
+  s+=`<line class="sel" x1="0" x2="0" y1="${pt}" y2="${H-pb}" visibility="hidden"/>`;
+  s+=`<rect x="${pl-8}" y="${pt}" width="${iw+16}" height="${ih}" style="fill:transparent"/></svg>`;
+  host.innerHTML=s;
+  const svg=host.querySelector("svg");
+  const hit=e=>{const r=svg.getBoundingClientRect();const px=(e.clientX-r.left)*(W/r.width);return clamp(Math.round((px-pl)/iw*(n-1)),0,n-1);};
+  svg.addEventListener("pointermove",e=>{const i=hit(e);if(i!==sel)select(i);});
+  svg.addEventListener("click",e=>select(hit(e)));
+  charts.push({svg,x});
+}
+function drawCharts(){
+  charts.length=0;
+  const S=film.scenes;
+  chart($("#cAff"),{h:220,min:0,max:100,grid:[0,25,50,75,100],label:"장면별 호감도",
+    series:[{vals:S.map(s=>s.aff),color:"var(--aff)",dots:true,area:true,deltas:S.map(s=>s.dAff)}]});
+  chart($("#cMood"),{h:220,min:-100,max:100,grid:[-100,-50,0,50,100],label:"장면별 두 사람의 기분",
+    series:[{vals:S.map(s=>s.mA),color:"var(--ca)",dots:true},{vals:S.map(s=>s.mB),color:"var(--cb)",dots:true,dash:true}]});
+  chart($("#cTen"),{h:140,min:0,max:100,grid:[0,50,100],label:"장면별 긴장감",
+    series:[{vals:S.map(s=>s.ten),color:"var(--mute)",area:true}]});
+  if(sel!=null) select(sel);
+}
+function chip(label,v){if(!v)return "";return `<span class="${v>0?"up":"dn"}">${esc(label)} ${v>0?"+":""}${v}</span>`;}
+function select(i){
+  sel=i;
+  charts.forEach(c=>{const l=c.svg.querySelector(".sel");l.setAttribute("x1",c.x(i));l.setAttribute("x2",c.x(i));l.setAttribute("visibility","visible");});
+  const s=film.scenes[i], A=film.cfg.A, B=film.cfg.B;
+  $("#pick").innerHTML=`<div class="h"><span>S#${String(i+1).padStart(2,"0")}</span><span>${ACT_NAME[s.act]}</span><span>${s.tc}</span><span style="color:var(--aff)">호감도 ${s.aff}${s.dAff?` (${s.dAff>0?"+":""}${s.dAff})`:""}</span></div>
+    <div class="t">${esc(s.text)}</div>
+    <div class="h"><span style="color:var(--ca)">${esc(A)} ${s.mA>0?"+":""}${s.mA} · ${s.eA}</span><span style="color:var(--cb)">${esc(B)} ${s.mB>0?"+":""}${s.mB} · ${s.eB}</span><span>긴장감 ${s.ten}</span></div>`;
+  document.querySelectorAll("#script li[data-i]").forEach(li=>li.classList.toggle("on",+li.dataset.i===i));
+}
+
+function renderResults(){
+  show("results");
+  const f=film, S=f.scenes, A=f.cfg.A, B=f.cfg.B;
+  $("#rNo").textContent=$("#tkNo").textContent;
+  $("#rTitle").textContent="〈"+f.title+"〉";
+  $("#rSub").textContent=f.genreName+" · "+A+" & "+B;
+  const st=$("#rStamp"); st.className="stamp "+f.endKey; st.innerHTML=`<div><small>SCREENED</small>${ENDS[f.endKey].replace(" ","<br>")}</div>`;
+  $("#rReview").innerHTML=`“${esc(f.review)}”<span>관객 한줄평 · ★ ${f.stars.toFixed(1)} / 5.0</span>`;
+  $("#rTags").innerHTML=[["ENDING",ENDS[f.endKey]],["RELATION",REL[f.cfg.rel].name],["RATING",f.rate==="all"?"ALL":f.rate+"+"],
+    ["VERSION",LENS[f.cfg.len].name],["RUNTIME",f.runtime+" MIN"],["SCENES",S.length]]
+    .map(([k,v])=>`<div><dt>${k} :</dt><dd>${esc(v)}</dd></div>`).join("");
+  $("#moodLegend").innerHTML=`<span><i></i>${esc(A)}</span><span><i class="dash"></i>${esc(B)}</span>`;
+  const affs=S.map(s=>s.aff);
+  $("#rTotal").innerHTML=`<div class="row big"><span>TOTAL</span><span>호감도 ${S[S.length-1].aff}</span></div>
+    <div class="row"><span>PEAK</span><span>${Math.max(...affs)}</span></div>
+    <div class="row"><span>LOW</span><span>${Math.min(...affs)}</span></div>
+    <div class="row"><span>START</span><span>${REL[f.cfg.rel].start}</span></div>`;
+  requestAnimationFrame(()=>{barcodeInto($("#barcode2"),f.title+A+B+S.length);});
+  $("#rCode").textContent=String(hash(f.title+A+B)).padStart(10,"0").slice(0,10).replace(/(\d{4})(\d{3})(\d{3})/,"$1 $2 $3");
+
+  // 캐릭터 카드
+  const card=(name,col,key,dk,ek)=>{
+    const last=S[S.length-1];
+    const best=S.reduce((m,s)=>s[dk]>m[dk]?s:m,S[0]);
+    const worst=S.reduce((m,s)=>s[dk]<m[dk]?s:m,S[0]);
+    const vals=S.map(s=>s[key]);
+    return `<div class="ch"><div class="nm"><i style="background:${col}"></i>${esc(name)}</div>
+      <div class="row"><span>마지막 상태</span><span>${last[ek]} (${last[key]>0?"+":""}${last[key]})</span></div>
+      <div class="row"><span>기분 범위</span><span>${Math.min(...vals)} ~ ${Math.max(...vals)}</span></div>
+      <div class="row"><span>가장 빛난 순간</span><span>S#${best.i+1} ${esc(best.text)}</span></div>
+      <div class="row"><span>가장 흔들린 순간</span><span>S#${worst.i+1} ${esc(worst.text)}</span></div></div>`;
+  };
+  $("#chars").innerHTML=card(A,"var(--ca)","mA","dA","eA")+card(B,"var(--cb)","mB","dB","eB");
+
+  // 스크립트
+  let html="", act=0;
+  S.forEach(s=>{
+    if(s.act!==act){act=s.act;html+=`<li class="act">${ACT_NAME[act]}</li>`;}
+    html+=`<li data-i="${s.i}" tabindex="0"><span class="tc"><b>S#${String(s.i+1).padStart(2,"0")}</b>${s.tc}</span><span class="tx">${esc(s.text)}</span>
+      <span class="dl">${chip("호감",s.dAff)}${chip(A,s.dA)}${chip(B,s.dB)}</span></li>`;
+  });
+  $("#script").innerHTML=html;
+  $("#sCount").textContent=S.length+"개 장면";
+  document.querySelectorAll("#script li[data-i]").forEach(li=>{
+    li.onclick=()=>select(+li.dataset.i);
+    li.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();select(+li.dataset.i);}};
+  });
+  sel=null;
+  drawCharts();
+  const peak=S.reduce((m,s)=>s.dAff>m.dAff?s:m,S[0]);
+  select(peak.i);
+  $("#copied").hidden=true; $("#fbWrap").innerHTML="";
+  $("#sharePanel").hidden=true; $("#shareImg").removeAttribute("src");
+  const sb=$("#shareBtn"); if(sb) sb.firstChild.textContent="결과 이미지 만들기 ";
+}
+let rz; window.addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{if(!$("#results").hidden)drawCharts();},150);});
+
+function scriptText(){
+  const f=film;
+  const lines=[`〈${f.title}〉`,`주연 ${f.cfg.A} · ${f.cfg.B} / ${f.genreName} / ${ENDS[f.endKey]}`,""];
+  let act=0;
+  f.scenes.forEach(s=>{
+    if(s.act!==act){act=s.act;lines.push("— "+ACT_NAME[act]+" —");}
+    lines.push(`S#${String(s.i+1).padStart(2,"0")}  ${s.text}  [호감도 ${s.aff}]`);
+  });
+  lines.push("",`관객 평점 ★${f.stars.toFixed(1)} · “${f.review}”`);
+  return lines.join("\n");
+}
+$("#copy").onclick=()=>{
+  const t=scriptText();
+  const fallback=()=>{$("#fbWrap").innerHTML=`<textarea class="fallback" id="fbText" readonly></textarea>`;const ta=$("#fbText");ta.value=t;ta.focus();ta.select();};
+  try{
+    navigator.clipboard.writeText(t).then(()=>{$("#copied").hidden=false;},fallback);
+  }catch(e){fallback();}
+};
+
+/* ---------- 공유 이미지 (canvas) ---------- */
+function wrapText(ctx,text,maxW,maxLines){
+  const words=text.split(" "); const lines=[]; let cur="";
+  const push=w=>{ // 긴 단어는 글자 단위로 자름
+    if(ctx.measureText(w).width<=maxW) return [w];
+    const out=[];let t="";for(const ch of w){if(ctx.measureText(t+ch).width>maxW){out.push(t);t=ch;}else t+=ch;}out.push(t);return out;
+  };
+  words.forEach(w=>{
+    const test=cur?cur+" "+w:w;
+    if(ctx.measureText(test).width<=maxW){cur=test;return;}
+    if(cur) lines.push(cur);
+    const parts=push(w); cur=parts.pop(); lines.push(...parts);
+  });
+  if(cur) lines.push(cur);
+  if(lines.length>maxLines){
+    const keep=lines.slice(0,maxLines); let last=keep[maxLines-1];
+    while(ctx.measureText(last+"…").width>maxW&&last.length) last=last.slice(0,-1);
+    keep[maxLines-1]=last+"…"; return keep;
+  }
+  return lines;
+}
+async function buildShareCard(f){
+  const S=f.scenes, A=f.cfg.A, B=f.cfg.B;
+  const best=S.reduce((m,s)=>s.dAff>m.dAff?s:m,S[0]);
+  const worst=S.reduce((m,s)=>s.dAff<m.dAff?s:m,S[0]);
+  const last=S[S.length-1];
+  const no=$("#rNo").textContent||"NO.0000";
+  const allText=f.title+A+B+f.genreName+best.text+worst.text+last.text+f.review+ENDS[f.endKey]+REL[f.cfg.rel].name+"〈〉“”·★호감도곡선명장면관람완료해피엔딩열린결말새드두사람의상영관#";
+  try{
+    await Promise.all([
+      document.fonts.load('800 60px "Noto Sans KR"',allText),
+      document.fonts.load('700 30px "Noto Sans KR"',allText),
+      document.fonts.load('500 28px "Noto Sans KR"',allText),
+      document.fonts.load('400 26px "Noto Sans KR"',allText),
+      document.fonts.load('400 20px "Nanum Gothic Coding"',allText),
+      document.fonts.load('400 20px "IBM Plex Mono"',"NOSCREENED0123456789:.#·&×+-ACTFLEGNDIRVUMHPKWYBO")
+    ]);
+  }catch(e){}
+  const W=1080;
+  const first=render(2000,1900);
+  const pbF=first.end, HF=pbF+12+56;
+  return render(HF,pbF).c;
+  function render(H,pb){
+  const c=document.createElement("canvas"); c.width=W;c.height=H;
+  const x=c.getContext("2d");
+  const BG="#0c0b0e",PAPER="#f3f1ec",INK="#161514",MUTE="#7e7a73",LINE="rgba(22,21,20,.2)",AFF="#d3365c";
+  const ENDC={good:"#2f7d4a",openE:"#8a6a1e",bad:"#c2402e"}[f.endKey];
+  const SANS='"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif';
+  const MONO='"IBM Plex Mono","Nanum Gothic Coding",monospace';
+  const ls=v=>{if("letterSpacing" in x) x.letterSpacing=v+"px";};
+  const font=(w,sz,fam)=>{x.font=`${w} ${sz}px ${fam}`;};
+  const dotted=(y,x0,x1,dash=[2,6],col=INK,lw=2)=>{x.save();x.strokeStyle=col;x.lineWidth=lw;x.setLineDash(dash);x.beginPath();x.moveTo(x0,y);x.lineTo(x1,y);x.stroke();x.restore();};
+
+  // 배경 + 종이
+  x.fillStyle=BG;x.fillRect(0,0,W,H);
+  const px=110,py=56,pw=860;
+  x.fillStyle=PAPER;x.fillRect(px,py,pw,pb-py);
+  // 하단 지그재그
+  x.beginPath();x.moveTo(px,pb);
+  for(let xx=px;xx<px+pw;xx+=20){x.lineTo(xx+10,pb+12);x.lineTo(Math.min(xx+20,px+pw),pb);}
+  x.closePath();x.fill();
+  // 상단 펀칭
+  x.fillStyle=BG;for(let xx=px+13;xx<px+pw;xx+=26){x.beginPath();x.arc(xx,py,8,0,Math.PI*2);x.fill();}
+  const L=px+56,R=px+pw-56,CW=R-L;
+  x.textBaseline="alphabetic";
+
+  // 상단 행
+  let y=py+58;
+  x.fillStyle=MUTE;font(400,19,MONO);ls(3);
+  x.textAlign="left";x.fillText(no,L,y);
+  x.textAlign="right";x.fillText("SCREENED",R,y);
+  ls(0);
+  // 제목
+  y+=78;x.fillStyle=INK;x.textAlign="center";
+  font(800,58,SANS);ls(-2);
+  const tl=wrapText(x,"〈"+f.title+"〉",CW-150,2);
+  tl.forEach((t,i)=>x.fillText(t,W/2,y+i*70));
+  y+=(tl.length-1)*70;ls(0);
+  y+=44;font(400,21,MONO);ls(4);x.fillStyle=MUTE;
+  x.fillText(wrapText(x,f.genreName+" · "+A+" & "+B,CW,1)[0],W/2,y);ls(0);
+  // 한줄평
+  y+=60;font(500,28,SANS);x.fillStyle=INK;ls(-0.5);
+  x.fillText(wrapText(x,"“"+f.review+"”",CW,1)[0],W/2,y);ls(0);
+  y+=36;font(400,19,MONO);x.fillStyle=MUTE;ls(3);
+  x.fillText("관객 평점 ★ "+f.stars.toFixed(1)+" / 5.0",W/2,y);ls(0);
+
+  // 메타
+  y+=40;dotted(y,L,R);
+  y+=42;
+  const meta=[["RELATION",REL[f.cfg.rel].name],["RUNTIME",f.runtime+" MIN"]];
+  const colW=CW/3;
+  const stampY=y+16;
+  meta.forEach(([k,v],i)=>{x.textAlign="left";x.fillStyle=MUTE;font(400,16,MONO);ls(3);x.fillText(k+" :",L+i*colW,y);ls(0);
+    x.fillStyle=INK;font(500,27,SANS);x.fillText(v,L+i*colW,y+38);});
+  // 도장
+  x.save();x.translate(R-80,stampY);x.rotate(-0.21);
+  x.strokeStyle=ENDC;x.fillStyle=ENDC;x.globalAlpha=.88;x.lineWidth=4;
+  x.beginPath();x.arc(0,0,66,0,Math.PI*2);x.stroke();
+  x.lineWidth=1.5;x.beginPath();x.arc(0,0,57,0,Math.PI*2);x.stroke();
+  x.textAlign="center";font(400,13,MONO);ls(3);x.fillText("SCREENED",0,-26);ls(0);
+  font(800,26,SANS);const ew=ENDS[f.endKey].split(" ");x.fillText(ew[0],0,8);x.fillText(ew[1]||"",0,38);
+  x.restore();
+
+  y+=72;
+  // 절취선
+  x.save();x.strokeStyle=INK;x.lineWidth=2;x.setLineDash([9,7]);x.beginPath();x.moveTo(px,y);x.lineTo(px+pw,y);x.stroke();x.restore();
+  x.fillStyle=BG;[px,px+pw].forEach(cx=>{x.beginPath();x.arc(cx,y,15,0,Math.PI*2);x.fill();});
+
+  const label=(yy,n,ko,en)=>{x.textAlign="left";x.fillStyle=MUTE;font(400,15,MONO);x.fillText(n,L,yy-10);
+    x.fillStyle=INK;font(700,27,SANS);ls(-0.5);x.fillText(ko,L+34,yy);const kw=x.measureText(ko).width;ls(0);
+    x.fillStyle=MUTE;font(400,15,MONO);ls(4);x.fillText(en,L+34+kw+14,yy);ls(0);};
+
+  // 호감도 곡선
+  y+=58;label(y,"#01","호감도 곡선","AFFECTION");
+  x.textAlign="right";x.fillStyle=MUTE;font(400,16,MONO);x.fillText("START "+S[0].aff+" → END "+last.aff,R,y);
+  y+=26;
+  const ch=180,cx0=L+40,cw=CW-40,n=S.length;
+  const gx=i=>cx0+i*cw/(n-1), gy=v=>y+ch-(v/100)*ch;
+  [0,50,100].forEach(g=>{x.strokeStyle=LINE;x.lineWidth=1.5;x.setLineDash([]);x.beginPath();x.moveTo(cx0,gy(g));x.lineTo(cx0+cw,gy(g));x.stroke();
+    x.fillStyle=MUTE;x.textAlign="right";font(400,15,MONO);x.fillText(g,cx0-10,gy(g)+5);});
+  S.forEach((s,i)=>{if(i>0&&s.act!==S[i-1].act){const xx=(gx(i)+gx(i-1))/2;x.save();x.strokeStyle=INK;x.globalAlpha=.4;x.setLineDash([2,5]);x.lineWidth=1.5;x.beginPath();x.moveTo(xx,y-4);x.lineTo(xx,y+ch);x.stroke();x.restore();
+    x.fillStyle=INK;x.textAlign="left";font(400,14,MONO);x.fillText(s.act+"막",xx+6,y+10);}});
+  x.beginPath();x.moveTo(gx(0),gy(0));S.forEach((s,i)=>x.lineTo(gx(i),gy(s.aff)));x.lineTo(gx(n-1),gy(0));x.closePath();
+  x.fillStyle="rgba(211,54,92,.14)";x.fill();
+  x.beginPath();S.forEach((s,i)=>i?x.lineTo(gx(i),gy(s.aff)):x.moveTo(gx(i),gy(s.aff)));
+  x.strokeStyle=AFF;x.lineWidth=4;x.lineJoin="round";x.stroke();
+  S.forEach((s,i)=>{x.beginPath();x.arc(gx(i),gy(s.aff),i===best.i||i===worst.i?8:4.5,0,Math.PI*2);x.fillStyle=PAPER;x.fill();
+    x.lineWidth=3;x.strokeStyle=i===best.i?"#2f7d4a":i===worst.i?"#c2402e":AFF;x.stroke();});
+  y+=ch+30;
+
+  // 명장면
+  y+=34;label(y,"#02","명장면","KEY SCENES");
+  y+=18;
+  const rows=[["BEST","#2f7d4a",best],["CRISIS","#c2402e",worst],["ENDING",INK,last]];
+  font(400,24,SANS);
+  rows.forEach(([k,col,sc])=>{
+    dotted(y,L,R,[2,6],LINE,2);
+    y+=40;
+    x.textAlign="left";x.fillStyle=col;font(400,15,MONO);ls(2);x.fillText(k,L,y-2);ls(0);
+    x.fillStyle=MUTE;x.fillText("S#"+String(sc.i+1).padStart(2,"0"),L,y+22);
+    font(400,24,SANS);x.fillStyle=INK;ls(-0.4);
+    const ln=wrapText(x,sc.text,CW-130,2);ln.forEach((t,j)=>x.fillText(t,L+120,y+j*36));ls(0);
+    const d=sc.dAff;if(d){x.textAlign="right";font(400,17,MONO);x.fillStyle=d>0?"#2f7d4a":"#c2402e";}
+    y+=Math.max(ln.length*36,46)+18;
+  });
+
+  // TOTAL
+  y+=4;dotted(y,L,R,[2,6],INK,2.5);
+  y+=50;x.textAlign="left";x.fillStyle=INK;font(500,30,MONO);ls(3);x.fillText("TOTAL",L,y);ls(0);
+  x.textAlign="right";font(700,32,SANS);x.fillText("호감도 "+last.aff,R,y);
+  y+=14;dotted(y,L,R,[2,6],INK,2.5);
+
+  // 바코드
+  const by=y+48, bh=62;
+  let h=hash(f.title+A+B)||1; const rnd=()=>{h^=h<<13;h^=h>>>17;h^=h<<5;h>>>=0;return h/4294967296;};
+  x.fillStyle=INK;let bx=L;
+  while(bx<R){const bw=2+Math.floor(rnd()*5),gw=2+Math.floor(rnd()*4);if(bx+bw>R)break;x.fillRect(bx,by,bw,bh);bx+=bw+gw;}
+  x.textAlign="center";x.fillStyle=MUTE;font(400,16,MONO);ls(8);
+  x.fillText(String(hash(f.title+A+B)).padStart(10,"0").slice(0,10),W/2,by+bh+28);ls(0);
+  x.fillStyle=INK;font(500,19,SANS);ls(1);x.fillText("#두사람의상영관",W/2,by+bh+58);ls(0);
+  return {c,end:by+bh+92};
+  }
+}
+let shareURL=null;
+async function openShare(){
+  const btn=$("#shareBtn"); btn.disabled=true; btn.firstChild.textContent="이미지 만드는 중… ";
+  const c=await buildShareCard(film);
+  btn.disabled=false; btn.firstChild.textContent="결과 이미지 다시 만들기 ";
+  const dataURL=c.toDataURL("image/png");
+  $("#shareImg").src=dataURL;
+  const blob=await new Promise(r=>c.toBlob(r,"image/png"));
+  if(shareURL) URL.revokeObjectURL(shareURL);
+  shareURL=URL.createObjectURL(blob);
+  const fname=`두사람의상영관_${film.cfg.A}_${film.cfg.B}.png`;
+  const dl=$("#dlBtn"); dl.href=shareURL; dl.download=fname;
+  const file=new File([blob],fname,{type:"image/png"});
+  const ns=$("#nativeShare");
+  ns.hidden=!(navigator.canShare&&navigator.canShare({files:[file]}));
+  ns.onclick=async()=>{try{await navigator.share({files:[file],text:tweetText()});}catch(e){}};
+  const page=/^https?:/.test(location.href)&&!/claude\.ai|claudeusercontent/.test(location.host)?location.href.split("#")[0]:"";
+  $("#tweetBtn").href="https://x.com/intent/tweet?text="+encodeURIComponent(tweetText()+(page?"\n"+page:""));
+  const p=$("#sharePanel"); p.hidden=false; p.scrollIntoView({behavior:reduced?"auto":"smooth",block:"start"});
+}
+function tweetText(){
+  const f=film;
+  return `〈${f.title}〉\n주연 ${f.cfg.A} × ${f.cfg.B} · ${f.genreName}\n${ENDS[f.endKey]} · ★${f.stars.toFixed(1)}\n“${f.review}”\n\n#두사람의상영관`;
+}
+$("#shareBtn").onclick=openShare;
+
+$("#again").onclick=()=>start(makeFilm(film.cfg));
+$("#replay").onclick=()=>start(film);
+$("#back").onclick=()=>{
+  state.rel=film.cfg.rel; state.genres=film.cfg.genres.slice(); state.len=film.cfg.len;
+  renderSetup(); show("setup");
+};
+</script>
+
+</html>
